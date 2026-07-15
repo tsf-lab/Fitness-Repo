@@ -337,6 +337,7 @@ async function loadData(){
   if(!data.calorieUnit) data.calorieUnit = 'kcal';
   if(!data.extraWorkouts) data.extraWorkouts = {};
   render();
+  requestAnimationFrame(focusFirstUnstarted);
 }
 async function saveData(){
   try{ localStorage.setItem(WT_KEY, JSON.stringify(data)); }catch(e){}
@@ -587,7 +588,7 @@ function renderDayTabs(){
   document.querySelectorAll('#dayTabs button[data-session]').forEach(btn=>{
     btn.onclick = (e)=>{
       if(e.target.dataset.delworkout) return;
-      currentSession = btn.dataset.session; render();
+      currentSession = btn.dataset.session; render(); focusFirstUnstarted();
     };
   });
   document.querySelectorAll('[data-delworkout]').forEach(span=>{
@@ -1351,6 +1352,36 @@ function openSwapMenu(key, muscle, orig){
   });
 }
 
+function firstFocusExId(){
+  const s=getSessionObj(currentSession); if(!s) return null;
+  const leaves=sessionLeaves(s).filter(ex=> !data.removed[s.id+'-'+ex.id]);
+  if(!leaves.length) return null;
+  let firstIncomplete=null;
+  for(const ex of leaves){
+    const rec=getExRecord(s.id, selectedDate, ex);
+    const done=completionCount(rec, ex);
+    const target=targetSetCount(rec, ex);
+    if(done===0) return ex.id;
+    if(firstIncomplete===null && target>0 && done<target) firstIncomplete=ex.id;
+  }
+  return firstIncomplete;
+}
+function focusFirstUnstarted(){
+  const s=getSessionObj(currentSession); if(!s) return;
+  const leaves=sessionLeaves(s).filter(ex=> !data.removed[s.id+'-'+ex.id]);
+  const exId=firstFocusExId();
+  if(!exId || (leaves.length && exId===leaves[0].id)){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+  let sel;
+  try{ sel='#exerciseList [data-reps="'+CSS.escape(exId)+'"], #exerciseList [data-duration="'+CSS.escape(exId)+'"]'; }
+  catch(e){ sel='#exerciseList [data-reps="'+exId+'"], #exerciseList [data-duration="'+exId+'"]'; }
+  const el=document.querySelector(sel);
+  if(!el){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+  const card=el.closest('#exerciseList > div') || el;
+  const header=document.getElementById('sessionHeader');
+  const offset=(header? header.getBoundingClientRect().height : 0) + 14;
+  const y=card.getBoundingClientRect().top + window.pageYOffset - offset;
+  window.scrollTo({top: Math.max(0, y), behavior:'smooth'});
+}
 function render(){
   const isFixed = SESSIONS.some(s=>s.id===currentSession);
   const isExtraForThisDate = getExtrasForDate(selectedDate).some(w=>w.id===currentSession);
