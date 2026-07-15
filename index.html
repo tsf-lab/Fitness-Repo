@@ -215,9 +215,10 @@ document.getElementById('profileList').addEventListener('click',function(e){
 
 /* ---- init ---- */
 (function(){
+  var wantSwitch=/[?&#]switch/.test(location.search+location.hash);
   var active=getActive();
   var u=active?findUser(active):null;
-  if(u) showPlans(u); else showChooser();
+  if(u && !wantSwitch) showPlans(u); else showChooser();
 })();
 </script>
 

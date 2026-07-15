@@ -436,7 +436,7 @@ function renderWeekRing(){
   const weekCal = weeklyCaloriesTotal();
   const unit = data.calorieUnit==='cal' ? 'Cal' : 'kCal';
   document.getElementById('weekRing').innerHTML =
-    (WT_NAME ? '<a href="index.html" title="Switch user" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--text);font-size:13px;font-weight:600;line-height:1;margin-bottom:6px;">'+wtEsc(WT_NAME)+'<i class="ti ti-chevron-down" style="font-size:13px;color:var(--text-faint);"></i></a>' : '')+
+    (WT_NAME ? '<a href="index.html?switch=1" title="Switch user" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--text);font-size:13px;font-weight:600;line-height:1;background:var(--surface);border:0.5px solid var(--line);padding:5px 10px;border-radius:9px;margin-bottom:8px;">'+wtEsc(WT_NAME)+'<i class="ti ti-chevron-down" style="font-size:13px;color:var(--text-faint);"></i></a>' : '')+
     '<div style="font-size:22px;font-weight:600;line-height:1;">'+anyComplete+'/7</div>'+
     '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.08em;">days trained</div>'+
     (stats.spanDays>0 ? '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">'+stats.trained+' trained / '+stats.spanDays+' days</div>' : '')+
