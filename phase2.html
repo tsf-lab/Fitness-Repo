@@ -86,7 +86,7 @@ function single(ex){ return {type:'single', ex}; }
 function superset(id, rounds, subs){ return {type:'superset', id, rounds, subs}; }
 
 const SESSIONS = [
-{id:'s1', title:'Chest & Biceps', accent:'chest', items:[
+{id:'s1', title:'Chest and biceps', accent:'chest', items:[
   single({id:'e1',name:'Knee Raise, Hanging',equip:'Other',muscle:'core',sets:3,reps:'15',w:false}),
   single({id:'e2',name:'Chest Press, Incline Bench, Plateloaded Machine',equip:'Machine',muscle:'chest',sets:5,reps:'12',w:true,note:'If no machine is available, use dumbbells'}),
   single({id:'e3',name:'Bench Press, Dumbbell',equip:'Free Weights',muscle:'chest',sets:4,reps:'10',w:true}),
@@ -104,7 +104,7 @@ const SESSIONS = [
   ]),
   single({id:'e12',name:'Stairmaster',equip:'Machine',muscle:'cardio',sets:1,reps:'10 min',w:false,timed:true,cardio:true,target:10,unit:'min'})
 ]},
-{id:'s2', title:'Back & Triceps', accent:'back', items:[
+{id:'s2', title:'Back and triceps', accent:'back', items:[
   single({id:'e1',name:'Sit Up',equip:'Floor',muscle:'core',sets:1,reps:'100',w:false,note:'Do in as few sets as possible'}),
   single({id:'e2',name:'Deadlift',equip:'Barbell/Rack',muscle:'back',sets:5,reps:'5-10',w:true}),
   single({id:'e3',name:'Lateral Raise, Cable',equip:'Cable',muscle:'shoulders',sets:3,reps:'10',w:true,note:'Cool down from deadlifts, squeeze traps on lateral raise'}),
@@ -122,7 +122,7 @@ const SESSIONS = [
   single({id:'e11',name:'Tricep Extension, Dumbbell, Standing',equip:'Free Weights',muscle:'arms',sets:4,reps:'12',w:true}),
   single({id:'e12',name:'Elliptical',equip:'Machine',muscle:'cardio',sets:1,reps:'10 min',w:false,timed:true,cardio:true,target:10,unit:'min'})
 ]},
-{id:'s3', title:'Shoulders & Abs', accent:'shoulders', items:[
+{id:'s3', title:'Shoulders and abs', accent:'shoulders', items:[
   single({id:'e1',name:'Sit Up, Twist, Decline',equip:'Floor',muscle:'core',sets:1,reps:'100',w:false,note:'Complete in as few sets as possible'}),
   single({id:'e2',name:'Shoulder Press, Cuban, Seated',equip:'Free Weights',muscle:'shoulders',sets:2,reps:'10',w:true,note:'Light weight warm up'}),
   single({id:'e3',name:'Shoulder Press, Dumbbell, Seated',equip:'Free Weights',muscle:'shoulders',sets:5,reps:'8-10',w:true}),
@@ -164,7 +164,7 @@ const SESSIONS = [
     {id:'e12',name:'Hip Abduction, Machine',equip:'Machine',muscle:'legs',sets:3,reps:'15',w:true}
   ])
 ]},
-{id:'s5', title:'Full Body', accent:'arms', items:[
+{id:'s5', title:'Full body', accent:'arms', items:[
   superset('sup1',3,[
     {id:'e1',name:'Burpee',equip:'Other',muscle:'cardio',sets:3,reps:'10',w:false},
     {id:'e2',name:'Dead Bug',equip:'Floor',muscle:'core',sets:3,reps:'30',w:false}
