@@ -801,15 +801,17 @@ function leafCardHTML(sessionId, ex, bg){
   return '<div style="background:'+bg+';border-radius:12px;padding:12px;border-left:3px solid '+color+';">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'+
       '<div>'+
-        '<span style="display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:5px;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">'+
+          '<span style="display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
+          (()=>{
+            const guessed = rec.equipment || ex.equip || guessEquipment(displayName);
+            const isGuess = !rec.equipment;
+            return '<select data-equipment="'+ex.id+'" style="font-size:10px;color:'+(isGuess?'var(--text-faint)':'var(--text)')+';font-style:'+(isGuess?'italic':'normal')+';background:var(--surface-hi);border:0.5px solid var(--line);border-radius:6px;padding:2px 5px;">'+
+              EQUIPMENT_OPTIONS.map(opt=>'<option value="'+opt+'"'+(guessed===opt?' selected':'')+'>'+opt+(isGuess && guessed===opt? ' (suggested)':'')+'</option>').join('')+
+            '</select>';
+          })()+
+        '</div>'+
         '<div class="exname" style="font-size:19px;line-height:1;">'+displayName.toUpperCase()+'</div>'+
-        (()=>{
-          const guessed = rec.equipment || ex.equip || guessEquipment(displayName);
-          const isGuess = !rec.equipment;
-          return '<select data-equipment="'+ex.id+'" style="font-size:10px;color:'+(isGuess?'var(--text-faint)':'var(--text)')+';font-style:'+(isGuess?'italic':'normal')+';background:var(--surface-hi);border:0.5px solid var(--line);border-radius:6px;padding:2px 5px;margin-top:4px;">'+
-            EQUIPMENT_OPTIONS.map(opt=>'<option value="'+opt+'"'+(guessed===opt?' selected':'')+'>'+opt+(isGuess && guessed===opt? ' (suggested)':'')+'</option>').join('')+
-          '</select>';
-        })()+
         '<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">'+(ex.timed? ex.sets+' sets &times; '+ex.target+' '+ex.unit : ex.sets+' sets &times; '+ex.reps+' reps')+'</div>'+
         (ex.note? '<div style="font-size:11px;color:var(--text-faint);font-style:italic;margin-top:3px;">'+ex.note+'</div>' : '')+
       '</div>'+
