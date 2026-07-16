@@ -745,7 +745,7 @@ function leafCardHTML(sessionId, ex, bg){
             const guessed = rec.equipment || ex.equip || guessEquipment(displayName);
             const isGuess = !rec.equipment;
             return '<select data-equipment="'+ex.id+'" style="font-size:10px;color:'+(isGuess?'var(--text-faint)':'var(--text)')+';font-style:'+(isGuess?'italic':'normal')+';background:var(--surface-hi);border:0.5px solid var(--line);border-radius:6px;padding:2px 5px;">'+
-              EQUIPMENT_OPTIONS.map(opt=>'<option value="'+opt+'"'+(guessed===opt?' selected':'')+'>'+opt+(isGuess && guessed===opt? ' (suggested)':'')+'</option>').join('')+
+              EQUIPMENT_OPTIONS.map(opt=>'<option value="'+opt+'"'+(guessed===opt?' selected':'')+'>'+opt+'</option>').join('')+
             '</select>';
           })()+
         '</div>'+
