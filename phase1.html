@@ -646,6 +646,7 @@ function leafCardHTML(sessionId, ex, bg){
         '<div style="display:flex;align-items:center;gap:3px;">'+
           '<input type="number" inputmode="numeric" data-duration="'+ex.id+'" data-idx="'+i+'" value="'+(val!=null?val:'')+'" placeholder="'+ex.target+'" '+(isSkipped?'disabled':'')+' style="width:48px;height:34px;text-align:center;background:'+(val? color : 'var(--surface-hi)')+';color:'+(val?'#121316':'var(--text)')+';border:1.5px solid '+color+';border-radius:9px;font-size:12px;font-weight:600;padding:0;">'+
           '<span style="font-size:10px;color:var(--text-faint);">'+ex.unit+'</span>'+
+          (!ex.cardio ? '<button data-timer="'+ex.id+'" data-timeridx="'+i+'" title="Start / stop timer" style="height:34px;padding:0 9px;border-radius:9px;border:1.5px solid '+color+';background:var(--surface-hi);color:var(--text);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-left:3px;"><i class="ti ti-player-play-filled" style="font-size:13px;"></i></button>' : '')+
         '</div>'+
         caption+
       '</div>';
@@ -848,6 +849,14 @@ function renderExercises(){
       render();
     };
   });
+  document.querySelectorAll('[data-timer]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const exId=btn.dataset.timer, idx=parseInt(btn.dataset.timeridx);
+      if(plankTimer && plankTimer.exId===exId && plankTimer.idx===idx) stopPlankTimer();
+      else startPlankTimer(exId, idx);
+    };
+  });
+  if(plankTimer) renderTimerBtn();
   document.querySelectorAll('[data-reps]').forEach(inp=>{
     inp.onchange = async ()=>{
       const exId = inp.dataset.reps, idx = parseInt(inp.dataset.idx);
@@ -1271,6 +1280,33 @@ function focusFirstUnstarted(){
   const offset=(header? header.getBoundingClientRect().height : 0) + 14;
   const y=card.getBoundingClientRect().top + window.pageYOffset - offset;
   window.scrollTo({top: Math.max(0, y), behavior:'smooth'});
+}
+
+var plankTimer = null;
+function fmtTimer(sec){ var m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
+function renderTimerBtn(){
+  if(!plankTimer) return;
+  var el = document.querySelector('[data-timer="'+plankTimer.exId+'"][data-timeridx="'+plankTimer.idx+'"]');
+  if(el){
+    var sec = Math.floor((Date.now()-plankTimer.startMs)/1000);
+    el.innerHTML = '<i class="ti ti-player-stop-filled" style="font-size:13px;"></i>'+fmtTimer(sec);
+    el.style.background='var(--down)'; el.style.color='#121316'; el.style.borderColor='var(--down)';
+  }
+}
+function startPlankTimer(exId, idx){
+  if(plankTimer){ clearInterval(plankTimer.interval); plankTimer=null; }
+  plankTimer = { exId:exId, idx:idx, startMs:Date.now(), interval:null };
+  plankTimer.interval = setInterval(renderTimerBtn, 250);
+  renderTimerBtn();
+}
+async function stopPlankTimer(){
+  if(!plankTimer) return;
+  clearInterval(plankTimer.interval);
+  var t = plankTimer; plankTimer = null;
+  var sec = Math.round((Date.now()-t.startMs)/1000);
+  var rec = getDateRecord(currentSession, selectedDate)[t.exId];
+  if(rec && rec.sets && rec.sets[t.idx]){ rec.sets[t.idx].duration = sec; await saveData(); }
+  render();
 }
 function render(){
   const isFixed = SESSIONS.some(s=>s.id===currentSession);
