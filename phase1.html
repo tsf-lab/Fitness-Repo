@@ -1423,6 +1423,13 @@ document.addEventListener('focusin', (e)=>{
         t.style.background = color; t.style.color = '#121316';
       }
     }
+  } else if(t.dataset.weight!=null && (t.value==='' || t.value==null)){
+    const prev = prevWeightFor(currentSession, t.dataset.weight);
+    if(prev && prev.weight!=null && prev.weight!==''){
+      t.value = prev.weight;
+      const rec = getDateRecord(currentSession, selectedDate)[t.dataset.weight];
+      if(rec){ rec.weight = prev.weight; saveData(); }
+    }
   }
   t.select();
 });
