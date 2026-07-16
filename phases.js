@@ -119,12 +119,12 @@ const PHASES = {
   p2: [
 {id:'s1', title:'Chest & Biceps', accent:'chest', items:[
   single({id:'e1',name:'Knee Raise, Hanging',equip:'Other',muscle:'core',sets:3,reps:'15',w:false}),
-  single({id:'e2',name:'Chest Press, Incline Bench, Plateloaded Machine',equip:'Machine',muscle:'chest',sets:5,reps:'12',w:true,note:'If no machine is available, use dumbbells'}),
+  single({id:'e2',name:'Chest Press, Incline Bench, Plateloaded',equip:'Machine',muscle:'chest',sets:5,reps:'12',w:true,note:'If no machine is available, use dumbbells'}),
   single({id:'e3',name:'DB Bench Press',equip:'Free Weights',muscle:'chest',sets:4,reps:'10',w:true}),
   single({id:'e4',name:'Bench Press',equip:'Barbell/Bench',muscle:'chest',sets:4,reps:'8',w:true,note:'GO HEAVY!!!'}),
   single({id:'e5',name:'Fly, Standing',equip:'Cable',muscle:'chest',sets:4,reps:'12',w:true}),
   single({id:'e6',name:'Fly, High to Low, Standing',equip:'Cable',muscle:'chest',sets:3,reps:'15',w:true}),
-  single({id:'e7',name:'Chest Press, Machine, Stack Loaded',equip:'Machine',muscle:'chest',sets:5,reps:'10',w:true,note:'Close grip'}),
+  single({id:'e7',name:'Chest Press, Stack Loaded',equip:'Machine',muscle:'chest',sets:5,reps:'10',w:true,note:'Close grip'}),
   superset('sup1',4,[
     {id:'e8',name:'DB Fly, One Arm',equip:'Free Weights',muscle:'chest',sets:4,reps:'20',w:true,note:'10 per side'},
     {id:'e9',name:'EZ Bar Bicep Curl',equip:'Free Weights',muscle:'arms',sets:4,reps:'12',w:true}
@@ -148,7 +148,7 @@ const PHASES = {
     {id:'e7',name:'Straight Arm Pull Down',equip:'Cable',muscle:'back',sets:4,reps:'12',w:true},
     {id:'e8',name:'Face Pull',equip:'Cable',muscle:'back',sets:4,reps:'10',w:true}
   ]),
-  single({id:'e9',name:'Shrug, Smith Machine',equip:'Machine',muscle:'back',sets:3,reps:'15',w:true}),
+  single({id:'e9',name:'Shrug, Smith',equip:'Machine',muscle:'back',sets:3,reps:'15',w:true}),
   single({id:'e10',name:'Tricep Extension, Rope',equip:'Cable',muscle:'arms',sets:5,reps:'15',w:true}),
   single({id:'e11',name:'DB Tricep Extension, Standing',equip:'Free Weights',muscle:'arms',sets:4,reps:'12',w:true}),
   single({id:'e12',name:'Elliptical',equip:'Machine',muscle:'cardio',sets:1,reps:'10 min',w:false,timed:true,cardio:true,target:10,unit:'min'})

@@ -63,12 +63,12 @@ p1,s5,Full Upper,arms,superset,sup4,3,e12,Shoulder To Shoulder Press,shoulders,M
 p1,s5,Full Upper,arms,superset,sup4,3,e13,Kettlebell Swing,legs,Free Weights,3,15,TRUE,,,,,
 p1,s5,Full Upper,arms,superset,sup4,3,e14,"Dip, Tricep",arms,Other,3,20,FALSE,,,,,
 p2,s1,Chest & Biceps,chest,single,,,e1,"Knee Raise, Hanging",core,Other,3,15,FALSE,,,,,
-p2,s1,Chest & Biceps,chest,single,,,e2,"Chest Press, Incline Bench, Plateloaded Machine",chest,Machine,5,12,TRUE,,,,,"If no machine is available, use dumbbells"
+p2,s1,Chest & Biceps,chest,single,,,e2,"Chest Press, Incline Bench, Plateloaded",chest,Machine,5,12,TRUE,,,,,"If no machine is available, use dumbbells"
 p2,s1,Chest & Biceps,chest,single,,,e3,DB Bench Press,chest,Free Weights,4,10,TRUE,,,,,
 p2,s1,Chest & Biceps,chest,single,,,e4,Bench Press,chest,Barbell/Bench,4,8,TRUE,,,,,GO HEAVY!!!
 p2,s1,Chest & Biceps,chest,single,,,e5,"Fly, Standing",chest,Cable,4,12,TRUE,,,,,
 p2,s1,Chest & Biceps,chest,single,,,e6,"Fly, High to Low, Standing",chest,Cable,3,15,TRUE,,,,,
-p2,s1,Chest & Biceps,chest,single,,,e7,"Chest Press, Machine, Stack Loaded",chest,Machine,5,10,TRUE,,,,,Close grip
+p2,s1,Chest & Biceps,chest,single,,,e7,"Chest Press, Stack Loaded",chest,Machine,5,10,TRUE,,,,,Close grip
 p2,s1,Chest & Biceps,chest,superset,sup1,4,e8,"DB Fly, One Arm",chest,Free Weights,4,20,TRUE,,,,,10 per side
 p2,s1,Chest & Biceps,chest,superset,sup1,4,e9,EZ Bar Bicep Curl,arms,Free Weights,4,12,TRUE,,,,,
 p2,s1,Chest & Biceps,chest,superset,sup2,4,e10,"DB Bicep Curl, Incline Bench",arms,Free Weights,4,10,TRUE,,,,,
@@ -82,7 +82,7 @@ p2,s2,Back & Triceps,back,superset,sup1,4,e5,"Row, One Arm, Seated",back,Cable,4
 p2,s2,Back & Triceps,back,superset,sup1,4,e6,"Push Up, Close Grip",chest,Floor,4,10,FALSE,,,,,
 p2,s2,Back & Triceps,back,superset,sup2,4,e7,Straight Arm Pull Down,back,Cable,4,12,TRUE,,,,,
 p2,s2,Back & Triceps,back,superset,sup2,4,e8,Face Pull,back,Cable,4,10,TRUE,,,,,
-p2,s2,Back & Triceps,back,single,,,e9,"Shrug, Smith Machine",back,Machine,3,15,TRUE,,,,,
+p2,s2,Back & Triceps,back,single,,,e9,"Shrug, Smith",back,Machine,3,15,TRUE,,,,,
 p2,s2,Back & Triceps,back,single,,,e10,"Tricep Extension, Rope",arms,Cable,5,15,TRUE,,,,,
 p2,s2,Back & Triceps,back,single,,,e11,"DB Tricep Extension, Standing",arms,Free Weights,4,12,TRUE,,,,,
 p2,s2,Back & Triceps,back,single,,,e12,Elliptical,cardio,Machine,1,10 min,FALSE,TRUE,TRUE,10,min,
