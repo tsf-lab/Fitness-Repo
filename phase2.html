@@ -1338,9 +1338,31 @@ function render(){
 }
 
 document.addEventListener('focusin', (e)=>{
-  if(e.target.tagName==='INPUT' && e.target.type==='number'){
-    e.target.select();
+  const t = e.target;
+  if(t.tagName!=='INPUT' || t.type!=='number') return;
+  const isDur = t.dataset.duration!=null;
+  const exId = t.dataset.reps!=null ? t.dataset.reps : (isDur ? t.dataset.duration : null);
+  if(exId!=null && (t.value==='' || t.value==null)){
+    const s = getSessionObj(currentSession);
+    const ex = s ? sessionLeaves(s).find(x=>x.id===exId) : null;
+    if(ex){
+      let targetVal;
+      if(isDur){ targetVal = ex.target; }
+      else { const nums=(String(ex.reps).match(/\d+/g)||['10']).map(Number); targetVal = nums[nums.length-1]; }
+      if(targetVal!=null && targetVal!==''){
+        t.value = targetVal;
+        const idx = parseInt(t.dataset.idx);
+        const rec = getDateRecord(currentSession, selectedDate)[exId];
+        if(rec && Array.isArray(rec.sets) && rec.sets[idx]){
+          if(isDur) rec.sets[idx].duration = targetVal; else rec.sets[idx].reps = targetVal;
+          saveData();
+        }
+        const color = 'var(--'+ex.muscle+')';
+        t.style.background = color; t.style.color = '#121316';
+      }
+    }
   }
+  t.select();
 });
 
 loadData();
