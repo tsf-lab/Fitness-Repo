@@ -1294,15 +1294,19 @@ function firstFocusExId(){
   const s=getSessionObj(currentSession); if(!s) return null;
   const leaves=sessionLeaves(s).filter(ex=> !data.removed[s.id+'-'+ex.id]);
   if(!leaves.length) return null;
-  let firstIncomplete=null;
-  for(const ex of leaves){
+  const info=leaves.map(ex=>{
     const rec=getExRecord(s.id, selectedDate, ex);
-    const done=completionCount(rec, ex);
-    const target=targetSetCount(rec, ex);
-    if(done===0) return ex.id;
-    if(firstIncomplete===null && target>0 && done<target) firstIncomplete=ex.id;
-  }
-  return firstIncomplete;
+    return {ex, done:completionCount(rec, ex), target:targetSetCount(rec, ex)};
+  });
+  let lastStarted=-1;
+  info.forEach((it,i)=>{ if(it.done>0) lastStarted=i; });
+  // next un-started AFTER your latest progress
+  for(let i=Math.max(0,lastStarted+1); i<info.length; i++){ if(info[i].done===0) return info[i].ex.id; }
+  // otherwise any un-started you skipped earlier
+  for(let i=0;i<info.length;i++){ if(info[i].done===0) return info[i].ex.id; }
+  // otherwise the first partially-done one
+  for(let i=0;i<info.length;i++){ if(info[i].target>0 && info[i].done<info[i].target) return info[i].ex.id; }
+  return null;
 }
 function focusFirstUnstarted(){
   const s=getSessionObj(currentSession); if(!s) return;
