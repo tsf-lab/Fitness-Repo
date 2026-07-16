@@ -148,7 +148,7 @@ const PHASES = {
     {id:'e7',name:'Straight Arm Pull Down',equip:'Cable',muscle:'back',sets:4,reps:'12',w:true},
     {id:'e8',name:'Face Pull',equip:'Cable',muscle:'back',sets:4,reps:'10',w:true}
   ]),
-  single({id:'e9',name:'Shrug, Smith',equip:'Machine',muscle:'back',sets:3,reps:'15',w:true}),
+  single({id:'e9',name:'Smith Machine Shrug',equip:'Machine',muscle:'back',sets:3,reps:'15',w:true}),
   single({id:'e10',name:'Tricep Extension, Rope',equip:'Cable',muscle:'arms',sets:5,reps:'15',w:true}),
   single({id:'e11',name:'DB Tricep Extension, Standing',equip:'Free Weights',muscle:'arms',sets:4,reps:'12',w:true}),
   single({id:'e12',name:'Elliptical',equip:'Machine',muscle:'cardio',sets:1,reps:'10 min',w:false,timed:true,cardio:true,target:10,unit:'min'})

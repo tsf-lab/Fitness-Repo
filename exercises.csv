@@ -82,7 +82,7 @@ p2,s2,Back & Triceps,back,superset,sup1,4,e5,"Row, One Arm, Seated",back,Cable,4
 p2,s2,Back & Triceps,back,superset,sup1,4,e6,"Push Up, Close Grip",chest,Floor,4,10,FALSE,,,,,
 p2,s2,Back & Triceps,back,superset,sup2,4,e7,Straight Arm Pull Down,back,Cable,4,12,TRUE,,,,,
 p2,s2,Back & Triceps,back,superset,sup2,4,e8,Face Pull,back,Cable,4,10,TRUE,,,,,
-p2,s2,Back & Triceps,back,single,,,e9,"Shrug, Smith",back,Machine,3,15,TRUE,,,,,
+p2,s2,Back & Triceps,back,single,,,e9,Smith Machine Shrug,back,Machine,3,15,TRUE,,,,,
 p2,s2,Back & Triceps,back,single,,,e10,"Tricep Extension, Rope",arms,Cable,5,15,TRUE,,,,,
 p2,s2,Back & Triceps,back,single,,,e11,"DB Tricep Extension, Standing",arms,Free Weights,4,12,TRUE,,,,,
 p2,s2,Back & Triceps,back,single,,,e12,Elliptical,cardio,Machine,1,10 min,FALSE,TRUE,TRUE,10,min,
