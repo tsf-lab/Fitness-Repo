@@ -579,10 +579,10 @@ function leafCardHTML(sessionId, ex, bg){
     if(ex.timed){
       const val = entry.duration;
       setsHtml += '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;opacity:'+(isSkipped?'0.4':'1')+';">'+
+        (!ex.cardio ? '<button data-timer="'+ex.id+'" data-timeridx="'+i+'" title="Start / stop timer" style="height:28px;padding:0 11px;border-radius:8px;border:1.5px solid '+color+';background:var(--surface-hi);color:var(--text);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-bottom:2px;"><i class="ti ti-clock" style="font-size:16px;"></i></button>' : '')+
         '<div style="display:flex;align-items:center;gap:3px;">'+
           '<input type="number" inputmode="numeric" data-duration="'+ex.id+'" data-idx="'+i+'" value="'+(val!=null?val:'')+'" placeholder="'+ex.target+'" '+(isSkipped?'disabled':'')+' style="width:48px;height:34px;text-align:center;background:'+(val? color : 'var(--surface-hi)')+';color:'+(val?'#121316':'var(--text)')+';border:1.5px solid '+color+';border-radius:9px;font-size:12px;font-weight:600;padding:0;">'+
           '<span style="font-size:10px;color:var(--text-faint);">'+ex.unit+'</span>'+
-          (!ex.cardio ? '<button data-timer="'+ex.id+'" data-timeridx="'+i+'" title="Start / stop timer" style="height:34px;padding:0 9px;border-radius:9px;border:1.5px solid '+color+';background:var(--surface-hi);color:var(--text);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-left:3px;"><i class="ti ti-player-play-filled" style="font-size:13px;"></i></button>' : '')+
         '</div>'+
         caption+
       '</div>';
