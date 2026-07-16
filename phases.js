@@ -122,8 +122,8 @@ const PHASES = {
   single({id:'e2',name:'Chest Press, Incline Bench, Plateloaded Machine',equip:'Machine',muscle:'chest',sets:5,reps:'12',w:true,note:'If no machine is available, use dumbbells'}),
   single({id:'e3',name:'DB Bench Press',equip:'Free Weights',muscle:'chest',sets:4,reps:'10',w:true}),
   single({id:'e4',name:'Bench Press',equip:'Barbell/Bench',muscle:'chest',sets:4,reps:'8',w:true,note:'GO HEAVY!!!'}),
-  single({id:'e5',name:'Fly, Cable, Standing',equip:'Cable',muscle:'chest',sets:4,reps:'12',w:true}),
-  single({id:'e6',name:'Fly, Cable, High to Low, Standing',equip:'Cable',muscle:'chest',sets:3,reps:'15',w:true}),
+  single({id:'e5',name:'Fly, Standing',equip:'Cable',muscle:'chest',sets:4,reps:'12',w:true}),
+  single({id:'e6',name:'Fly, High to Low, Standing',equip:'Cable',muscle:'chest',sets:3,reps:'15',w:true}),
   single({id:'e7',name:'Chest Press, Machine, Stack Loaded',equip:'Machine',muscle:'chest',sets:5,reps:'10',w:true,note:'Close grip'}),
   superset('sup1',4,[
     {id:'e8',name:'DB Fly, One Arm',equip:'Free Weights',muscle:'chest',sets:4,reps:'20',w:true,note:'10 per side'},
@@ -138,10 +138,10 @@ const PHASES = {
 {id:'s2', title:'Back & Triceps', accent:'back', items:[
   single({id:'e1',name:'Sit Up',equip:'Floor',muscle:'core',sets:1,reps:'100',w:false,note:'Do in as few sets as possible'}),
   single({id:'e2',name:'Deadlift',equip:'Barbell/Rack',muscle:'back',sets:5,reps:'10',w:true}),
-  single({id:'e3',name:'Lateral Raise, Cable',equip:'Cable',muscle:'shoulders',sets:3,reps:'10',w:true,note:'Cool down from deadlifts, squeeze traps on lateral raise'}),
+  single({id:'e3',name:'Lateral Raise',equip:'Cable',muscle:'shoulders',sets:3,reps:'10',w:true,note:'Cool down from deadlifts, squeeze traps on lateral raise'}),
   single({id:'e4',name:'Pull Down, Wide Grip',equip:'Cable',muscle:'back',sets:4,reps:'10',w:true}),
   superset('sup1',4,[
-    {id:'e5',name:'Row, Cable, One Arm, Seated',equip:'Cable',muscle:'back',sets:4,reps:'20',w:true,note:'10 per side'},
+    {id:'e5',name:'Row, One Arm, Seated',equip:'Cable',muscle:'back',sets:4,reps:'20',w:true,note:'10 per side'},
     {id:'e6',name:'Push Up, Close Grip',equip:'Floor',muscle:'chest',sets:4,reps:'10',w:false}
   ]),
   superset('sup2',4,[
