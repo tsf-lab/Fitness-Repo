@@ -48,18 +48,17 @@ input{font-family:'Inter',system-ui,sans-serif;}
     <div id="authTitle" style="font-size:15px;color:var(--text);font-weight:600;margin-bottom:4px;">Log in</div>
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Your profile and workout history sync to your account — open it on any device.</div>
 
-    <input id="nameField" class="field" type="text" placeholder="Your name" autocomplete="name" style="display:none;">
-    <input id="emailField" class="field" type="email" placeholder="Email" autocomplete="email">
+    <input id="userField" class="field" type="text" placeholder="Username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
     <input id="passField" class="field" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
 
     <div id="authErr" style="display:none;font-size:12px;color:var(--down);margin:2px 0 12px;"></div>
 
     <button id="authSubmit" class="primary">Log in</button>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+    <div style="margin-top:14px;">
       <button id="authToggle" style="background:none;border:0;color:var(--text-dim);font-size:12px;text-decoration:underline;padding:0;">Need an account? Sign up</button>
-      <button id="forgotBtn" style="background:none;border:0;color:var(--text-faint);font-size:12px;padding:0;">Forgot password?</button>
     </div>
+    <div id="signupHint" style="display:none;font-size:11px;color:var(--text-faint);margin-top:10px;">No email needed. There's no password reset, so choose one you'll remember.</div>
   </div>
 
   <!-- HOME (signed in) -->
@@ -101,23 +100,31 @@ input{font-family:'Inter',system-ui,sans-serif;}
 </div>
 
 <script>
+/* Usernames are mapped to a synthetic email so we can use Firebase's
+   email/password auth without the user ever needing a real email. */
+var USER_DOMAIN = 'tfsfitness.app';
 var authMode = 'login';
 function $(id){ return document.getElementById(id); }
 function show(el, on){ el.style.display = on ? '' : 'none'; }
 
+function userToEmail(u){ return u.trim().toLowerCase() + '@' + USER_DOMAIN; }
+function validUsername(u){ return /^[a-zA-Z0-9._-]{3,20}$/.test(u.trim()); }
+
 function setError(msg){
   var e=$('authErr');
+  e.style.color='var(--down)';
   if(msg){ e.textContent=msg; e.style.display='block'; } else { e.style.display='none'; }
 }
 
 function friendly(err){
   var c = err && err.code ? err.code : '';
-  if(c==='auth/invalid-email') return 'That email address looks invalid.';
+  if(c==='auth/email-already-in-use') return 'That username is already taken.';
+  if(c==='auth/invalid-email') return 'Username has invalid characters.';
   if(c==='auth/missing-password' || c==='auth/weak-password') return 'Password must be at least 6 characters.';
-  if(c==='auth/email-already-in-use') return 'An account with that email already exists — try logging in.';
-  if(c==='auth/invalid-credential' || c==='auth/wrong-password' || c==='auth/user-not-found') return 'Email or password is incorrect.';
+  if(c==='auth/invalid-credential' || c==='auth/wrong-password' || c==='auth/user-not-found') return 'Username or password is incorrect.';
   if(c==='auth/too-many-requests') return 'Too many attempts. Wait a moment and try again.';
   if(c==='auth/network-request-failed') return 'Network problem — check your connection.';
+  if(c==='auth/configuration-not-found') return 'Login is not enabled yet in Firebase (enable Email/Password sign-in).';
   return (err && err.message) ? err.message : 'Something went wrong. Please try again.';
 }
 
@@ -125,32 +132,32 @@ function renderAuthMode(){
   setError('');
   if(authMode==='signup'){
     $('authTitle').textContent = 'Create your account';
-    show($('nameField'), true);
     $('authSubmit').textContent = 'Sign up';
     $('authToggle').textContent = 'Have an account? Log in';
     $('passField').setAttribute('autocomplete','new-password');
+    show($('signupHint'), true);
   } else {
     $('authTitle').textContent = 'Log in';
-    show($('nameField'), false);
     $('authSubmit').textContent = 'Log in';
     $('authToggle').textContent = 'Need an account? Sign up';
     $('passField').setAttribute('autocomplete','current-password');
+    show($('signupHint'), false);
   }
 }
 
 function doAuth(){
-  var email = $('emailField').value.trim();
+  var uname = $('userField').value.trim();
   var pass = $('passField').value;
-  var name = $('nameField').value.trim();
   setError('');
-  if(!email || !pass){ setError('Enter your email and password.'); return; }
+  if(!uname || !pass){ setError('Enter a username and password.'); return; }
+  if(authMode==='signup' && !validUsername(uname)){ setError('Username must be 3-20 characters: letters, numbers, . _ - only.'); return; }
+  var email = userToEmail(uname);
   $('authSubmit').disabled = true;
   var done = function(){ $('authSubmit').disabled = false; };
   if(authMode==='signup'){
-    if(!name){ setError('Enter your name.'); done(); return; }
     wtAuth.createUserWithEmailAndPassword(email, pass)
-      .then(function(cred){ return cred.user.updateProfile({ displayName: name }); })
-      .then(function(){ done(); /* onAuthStateChanged shows home */ })
+      .then(function(cred){ return cred.user.updateProfile({ displayName: uname }); })
+      .then(function(){ done(); })
       .catch(function(err){ done(); setError(friendly(err)); });
   } else {
     wtAuth.signInWithEmailAndPassword(email, pass)
@@ -160,21 +167,12 @@ function doAuth(){
 }
 
 $('authSubmit').addEventListener('click', doAuth);
+$('userField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
 $('passField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
-$('emailField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
-$('nameField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
 
 $('authToggle').addEventListener('click', function(){
   authMode = (authMode==='signup') ? 'login' : 'signup';
   renderAuthMode();
-});
-
-$('forgotBtn').addEventListener('click', function(){
-  var email = $('emailField').value.trim();
-  if(!email){ setError('Enter your email above first, then tap Forgot password.'); return; }
-  wtAuth.sendPasswordResetEmail(email)
-    .then(function(){ setError(''); var e=$('authErr'); e.style.color='var(--text-dim)'; e.textContent='Password reset email sent to '+email+'.'; e.style.display='block'; })
-    .catch(function(err){ var e=$('authErr'); e.style.color='var(--down)'; setError(friendly(err)); });
 });
 
 $('logoutBtn').addEventListener('click', function(){ wtAuth.signOut(); });
