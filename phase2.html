@@ -146,23 +146,29 @@ function last7Days(){
   return days;
 }
 
-async function loadData(){
-  var loaded = null, fromCloud = false;
-  try{ loaded = await wtLoadPhase(WT_UID, PHASE); if(loaded) fromCloud = true; }catch(e){}
-  if(!loaded){ try{ const raw = localStorage.getItem(CACHE_KEY); if(raw) loaded = JSON.parse(raw); }catch(e){} }
-  if(!loaded){
-    try{ const oa = localStorage.getItem('wt-active-user'); if(oa){ const r2 = localStorage.getItem('wt::'+oa+'::'+PHASE); if(r2) loaded = JSON.parse(r2); } }catch(e){}
-  }
-  data = loaded || {};
+function wtApplyData(obj){
+  data = obj || {};
   if(!data.progress) data.progress = {};
   if(!data.swaps) data.swaps = {};
   if(!data.removed) data.removed = {};
   if(!data.customExercises) data.customExercises = {};
   if(!data.calorieUnit) data.calorieUnit = 'kcal';
   if(!data.extraWorkouts) data.extraWorkouts = {};
-  if(!fromCloud && WT_UID) wtSavePhase(WT_UID, PHASE, data);
+}
+async function loadData(){
+  // Instant paint from local cache (or older local-profile data) so the plan always shows.
+  var cached = null;
+  try{ const raw = localStorage.getItem(CACHE_KEY); if(raw) cached = JSON.parse(raw); }catch(e){}
+  if(!cached){ try{ const oa = localStorage.getItem('wt-active-user'); if(oa){ const r2 = localStorage.getItem('wt::'+oa+'::'+PHASE); if(r2) cached = JSON.parse(r2); } }catch(e){} }
+  wtApplyData(cached);
   render();
   requestAnimationFrame(focusFirstUnstarted);
+  // Then sync from the cloud (source of truth); seed the cloud if it has nothing yet.
+  try{
+    const cloud = await wtLoadPhase(WT_UID, PHASE);
+    if(cloud){ wtApplyData(cloud); render(); }
+    else if(WT_UID){ wtSavePhase(WT_UID, PHASE, data); }
+  }catch(e){}
 }
 async function saveData(){
   try{ if(CACHE_KEY) localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
