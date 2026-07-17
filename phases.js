@@ -341,7 +341,7 @@ const PHASES = {
     {id:'e12',name:'Sit Up, Frog',equip:'Floor',muscle:'core',sets:3,reps:'12',w:false}
   ])
 ]},
-{id:'s2', title:'FST-7 Upper', accent:'chest', items:[
+{id:'s2', title:'Upper', accent:'chest', items:[
   single({id:'e1',name:'Treadmill, Power Walk',equip:'Machine',muscle:'cardio',sets:1,reps:'10 min',w:false,timed:true,cardio:true,target:10,unit:'min',note:'Min speed 2.5 mph, min incline 5'}),
   single({id:'e2',name:'DB Bench Press',equip:'Free Weights',muscle:'chest',sets:4,reps:'12',w:true}),
   single({id:'e3',name:'Chest Press',equip:'Cable',muscle:'chest',sets:4,reps:'10',w:true}),
@@ -355,7 +355,7 @@ const PHASES = {
   single({id:'e9',name:'Hammer Curl, Standing',equip:'Free Weights',muscle:'arms',sets:3,reps:'10',w:true}),
   single({id:'e10',name:'Bicep Curl, Ez Bar',equip:'Free Weights',muscle:'arms',sets:7,reps:'15',w:true})
 ]},
-{id:'s3', title:'FST-7 Lower', accent:'legs', items:[
+{id:'s3', title:'Lower', accent:'legs', items:[
   single({id:'e1',name:'Bike',equip:'Machine',muscle:'cardio',sets:1,reps:'10 min',w:false,timed:true,cardio:true,target:10,unit:'min'}),
   single({id:'e2',name:'Leg Press',equip:'Machine',muscle:'legs',sets:7,reps:'15',w:true}),
   superset('sup1',3,[
