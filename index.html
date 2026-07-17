@@ -8,7 +8,7 @@
 :root{
   --bg:#121316; --surface:#1B1D22; --surface-hi:#25282F; --line:#31343C;
   --text:#EDEBE4; --text-dim:#9A9CA6; --text-faint:#6B6E77;
-  --p1:#A56CC1; --p2:#3E8FD0;
+  --p1:#A56CC1; --p2:#3E8FD0; --down:#D9694F;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;background:var(--bg);min-height:100vh;}
@@ -19,11 +19,20 @@ button{font-family:'Inter',system-ui,sans-serif;cursor:pointer;}
 input{font-family:'Inter',system-ui,sans-serif;}
 .pill{background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:12px;padding:7px 12px;border-radius:9px;}
 .pill:hover{border-color:var(--text-faint);color:var(--text);}
+.field{width:100%;background:var(--surface);border:0.5px solid var(--line);border-radius:10px;color:var(--text);font-size:15px;padding:12px 13px;outline:none;margin-bottom:10px;}
+.field:focus{border-color:var(--text-faint);}
+.primary{width:100%;background:var(--text);border:0;color:var(--bg);font-weight:600;font-size:15px;padding:13px;border-radius:10px;}
+.plancard{background:var(--surface);border:0.5px solid var(--line);border-radius:14px;padding:16px;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s,background .15s;}
+.plancard:hover{background:var(--surface-hi);border-color:var(--text-faint);}
 .fade{animation:fade .25s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
 </head>
 <body>
 
@@ -34,35 +43,34 @@ input{font-family:'Inter',system-ui,sans-serif;}
     <h1 class="brand" style="font-size:40px;margin:2px 0 0;line-height:1;">WORKOUT HUB</h1>
   </div>
 
-  <!-- SCREEN: choose / create profile -->
-  <div id="screenChooser" style="display:none;">
-    <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Who's training?</div>
-    <div id="profileList" style="display:flex;flex-direction:column;gap:9px;margin-bottom:14px;"></div>
+  <!-- AUTH -->
+  <div id="authScreen" style="display:none;" class="fade">
+    <div id="authTitle" style="font-size:15px;color:var(--text);font-weight:600;margin-bottom:4px;">Log in</div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Your profile and workout history sync to your account — open it on any device.</div>
 
-    <div id="addBlock">
-      <button id="showAddBtn" class="pill" style="display:inline-flex;align-items:center;gap:6px;">
-        <i class="ti ti-plus" style="font-size:15px;"></i>New profile
-      </button>
-      <div id="addForm" style="display:none;gap:8px;margin-top:4px;">
-        <input id="nameInput" type="text" maxlength="24" placeholder="Enter a name"
-          style="flex:1;background:var(--surface);border:0.5px solid var(--line);border-radius:10px;color:var(--text);font-size:14px;padding:11px 13px;outline:none;">
-        <button id="createBtn" style="background:var(--text);border:0;color:var(--bg);font-weight:600;font-size:14px;padding:0 16px;border-radius:10px;">Create</button>
-      </div>
-      <div id="addErr" style="display:none;font-size:12px;color:#D9694F;margin-top:8px;"></div>
+    <input id="nameField" class="field" type="text" placeholder="Your name" autocomplete="name" style="display:none;">
+    <input id="emailField" class="field" type="email" placeholder="Email" autocomplete="email">
+    <input id="passField" class="field" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+
+    <div id="authErr" style="display:none;font-size:12px;color:var(--down);margin:2px 0 12px;"></div>
+
+    <button id="authSubmit" class="primary">Log in</button>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+      <button id="authToggle" style="background:none;border:0;color:var(--text-dim);font-size:12px;text-decoration:underline;padding:0;">Need an account? Sign up</button>
+      <button id="forgotBtn" style="background:none;border:0;color:var(--text-faint);font-size:12px;padding:0;">Forgot password?</button>
     </div>
   </div>
 
-  <!-- SCREEN: pick a plan -->
-  <div id="screenPlans" style="display:none;">
+  <!-- HOME (signed in) -->
+  <div id="homeScreen" style="display:none;" class="fade">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="font-size:13px;color:var(--text-dim);">Training as <span id="planUserName" style="color:var(--text);font-weight:600;"></span></div>
-      <button id="switchBtn" class="pill" style="display:inline-flex;align-items:center;gap:5px;">
-        <i class="ti ti-switch-horizontal" style="font-size:14px;"></i>Switch
-      </button>
+      <div style="font-size:13px;color:var(--text-dim);">Training as <span id="homeUser" style="color:var(--text);font-weight:600;"></span></div>
+      <button id="logoutBtn" class="pill" style="display:inline-flex;align-items:center;gap:5px;"><i class="ti ti-logout" style="font-size:14px;"></i>Log out</button>
     </div>
 
     <a href="phase1.html" style="text-decoration:none;color:inherit;">
-      <div class="plancard fade" style="border-left:3px solid var(--p1);">
+      <div class="plancard" style="border-left:3px solid var(--p1);">
         <div>
           <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Bulk</div>
           <h2 style="font-size:26px;margin:2px 0 3px;line-height:1;">PHASE 1</h2>
@@ -73,7 +81,7 @@ input{font-family:'Inter',system-ui,sans-serif;}
     </a>
 
     <a href="phase2.html" style="text-decoration:none;color:inherit;">
-      <div class="plancard fade" style="border-left:3px solid var(--p2);">
+      <div class="plancard" style="border-left:3px solid var(--p2);">
         <div>
           <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Bulk</div>
           <h2 style="font-size:26px;margin:2px 0 3px;line-height:1;">PHASE 2</h2>
@@ -84,142 +92,105 @@ input{font-family:'Inter',system-ui,sans-serif;}
     </a>
 
     <div style="font-size:12px;color:var(--text-faint);margin-top:18px;border-top:0.5px solid var(--line);padding-top:13px;">
-      Your logged sets, weights and notes save to this profile on this device.
+      Logged sets, weights and notes save to your account in the cloud and stay in sync across your devices.
     </div>
   </div>
 
+  <div id="loading" style="font-size:13px;color:var(--text-faint);">Loading…</div>
+
 </div>
 
-<style>
-.plancard{background:var(--surface);border:0.5px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s,background .15s;}
-.plancard:hover{background:var(--surface-hi);border-color:var(--text-faint);}
-.profilebtn{background:var(--surface);border:0.5px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;width:100%;text-align:left;color:var(--text);transition:border-color .15s,background .15s;}
-.profilebtn:hover{background:var(--surface-hi);border-color:var(--text-faint);}
-.avatar{width:38px;height:38px;border-radius:50%;background:var(--surface-hi);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--text);flex:0 0 auto;}
-</style>
-
 <script>
-var USERS_KEY='wt-users', ACTIVE_KEY='wt-active-user';
+var authMode = 'login';
+function $(id){ return document.getElementById(id); }
+function show(el, on){ el.style.display = on ? '' : 'none'; }
 
-function getUsers(){ try{ var v=JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
-function saveUsers(u){ try{ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }catch(e){} }
-function getActive(){ try{ return localStorage.getItem(ACTIVE_KEY); }catch(e){ return null; } }
-function setActive(id){ try{ localStorage.setItem(ACTIVE_KEY, id); }catch(e){} }
-function findUser(id){ var us=getUsers(); for(var i=0;i<us.length;i++){ if(us[i].id===id) return us[i]; } return null; }
-
-function makeId(name){
-  var slug=(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,20)||'user';
-  return slug+'-'+Math.random().toString(36).slice(2,6);
+function setError(msg){
+  var e=$('authErr');
+  if(msg){ e.textContent=msg; e.style.display='block'; } else { e.style.display='none'; }
 }
 
-/* Move any pre-profile data onto the first profile created, so nothing is lost. */
-function migrateLegacy(id){
-  try{
-    var map=[['workout-data','wt::'+id+'::p1'],['workout-data-phase2','wt::'+id+'::p2']];
-    for(var i=0;i<map.length;i++){
-      var old=localStorage.getItem(map[i][0]);
-      if(old && !localStorage.getItem(map[i][1])) localStorage.setItem(map[i][1], old);
-    }
-  }catch(e){}
+function friendly(err){
+  var c = err && err.code ? err.code : '';
+  if(c==='auth/invalid-email') return 'That email address looks invalid.';
+  if(c==='auth/missing-password' || c==='auth/weak-password') return 'Password must be at least 6 characters.';
+  if(c==='auth/email-already-in-use') return 'An account with that email already exists — try logging in.';
+  if(c==='auth/invalid-credential' || c==='auth/wrong-password' || c==='auth/user-not-found') return 'Email or password is incorrect.';
+  if(c==='auth/too-many-requests') return 'Too many attempts. Wait a moment and try again.';
+  if(c==='auth/network-request-failed') return 'Network problem — check your connection.';
+  return (err && err.message) ? err.message : 'Something went wrong. Please try again.';
 }
 
-function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-
-function showChooser(){
-  document.getElementById('screenPlans').style.display='none';
-  document.getElementById('screenChooser').style.display='block';
-  var list=document.getElementById('profileList');
-  var users=getUsers();
-  list.innerHTML='';
-  if(!users.length){
-    list.innerHTML='<div style="font-size:12px;color:var(--text-faint);padding:2px 0 4px;">No profiles yet — create one to get started.</div>';
+function renderAuthMode(){
+  setError('');
+  if(authMode==='signup'){
+    $('authTitle').textContent = 'Create your account';
+    show($('nameField'), true);
+    $('authSubmit').textContent = 'Sign up';
+    $('authToggle').textContent = 'Have an account? Log in';
+    $('passField').setAttribute('autocomplete','new-password');
+  } else {
+    $('authTitle').textContent = 'Log in';
+    show($('nameField'), false);
+    $('authSubmit').textContent = 'Log in';
+    $('authToggle').textContent = 'Need an account? Sign up';
+    $('passField').setAttribute('autocomplete','current-password');
   }
-  users.forEach(function(u){
-    var initial=(u.name||'?').trim().charAt(0).toUpperCase()||'?';
-    var row=document.createElement('div');
-    row.style.cssText='display:flex;gap:8px;align-items:stretch;';
-    row.innerHTML=
-      '<button class="profilebtn" data-pick="'+esc(u.id)+'">'+
-        '<span class="avatar">'+esc(initial)+'</span>'+
-        '<span style="flex:1;"><span style="display:block;font-size:15px;font-weight:600;">'+esc(u.name)+'</span>'+
-        '<span style="display:block;font-size:11px;color:var(--text-faint);">Tap to train</span></span>'+
-        '<i class="ti ti-chevron-right" style="font-size:20px;color:var(--text-faint);"></i>'+
-      '</button>'+
-      '<button class="pill" data-del="'+esc(u.id)+'" title="Delete profile" style="flex:0 0 auto;display:flex;align-items:center;">'+
-        '<i class="ti ti-trash" style="font-size:15px;"></i></button>';
-    list.appendChild(row);
-  });
 }
 
-function showPlans(user){
-  document.getElementById('screenChooser').style.display='none';
-  document.getElementById('planUserName').textContent=user.name;
-  document.getElementById('screenPlans').style.display='block';
-}
-
-function createUser(name){
-  name=(name||'').trim();
-  if(!name){ return 'Please enter a name.'; }
-  var users=getUsers();
-  for(var i=0;i<users.length;i++){ if(users[i].name.toLowerCase()===name.toLowerCase()) return 'That name already exists — pick it from the list.'; }
-  var first=users.length===0;
-  var id=makeId(name);
-  users.push({id:id,name:name,created:Date.now()});
-  saveUsers(users);
-  setActive(id);
-  if(first) migrateLegacy(id);
-  return null;
-}
-
-function deleteUser(id){
-  var users=getUsers().filter(function(u){return u.id!==id;});
-  saveUsers(users);
-  try{ localStorage.removeItem('wt::'+id+'::p1'); localStorage.removeItem('wt::'+id+'::p2'); }catch(e){}
-  if(getActive()===id) setActive('');
-  showChooser();
-}
-
-/* ---- events ---- */
-document.getElementById('showAddBtn').addEventListener('click',function(){
-  document.getElementById('addForm').style.display='flex';
-  this.style.display='none';
-  document.getElementById('nameInput').focus();
-});
-function doCreate(){
-  var input=document.getElementById('nameInput');
-  var err=document.getElementById('addErr');
-  var msg=createUser(input.value);
-  if(msg){ err.textContent=msg; err.style.display='block'; return; }
-  err.style.display='none';
-  showPlans(findUser(getActive()));
-}
-document.getElementById('createBtn').addEventListener('click',doCreate);
-document.getElementById('nameInput').addEventListener('keydown',function(e){ if(e.key==='Enter') doCreate(); });
-
-document.getElementById('switchBtn').addEventListener('click',showChooser);
-
-document.getElementById('profileList').addEventListener('click',function(e){
-  var pick=e.target.closest('[data-pick]');
-  var del=e.target.closest('[data-del]');
-  if(del){
-    var u=findUser(del.getAttribute('data-del'));
-    if(u && confirm('Delete profile "'+u.name+'" and its saved workout data? This cannot be undone.')) deleteUser(u.id);
-    return;
+function doAuth(){
+  var email = $('emailField').value.trim();
+  var pass = $('passField').value;
+  var name = $('nameField').value.trim();
+  setError('');
+  if(!email || !pass){ setError('Enter your email and password.'); return; }
+  $('authSubmit').disabled = true;
+  var done = function(){ $('authSubmit').disabled = false; };
+  if(authMode==='signup'){
+    if(!name){ setError('Enter your name.'); done(); return; }
+    wtAuth.createUserWithEmailAndPassword(email, pass)
+      .then(function(cred){ return cred.user.updateProfile({ displayName: name }); })
+      .then(function(){ done(); /* onAuthStateChanged shows home */ })
+      .catch(function(err){ done(); setError(friendly(err)); });
+  } else {
+    wtAuth.signInWithEmailAndPassword(email, pass)
+      .then(function(){ done(); })
+      .catch(function(err){ done(); setError(friendly(err)); });
   }
-  if(pick){
-    var id=pick.getAttribute('data-pick');
-    setActive(id);
-    showPlans(findUser(id));
-  }
+}
+
+$('authSubmit').addEventListener('click', doAuth);
+$('passField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
+$('emailField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
+$('nameField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
+
+$('authToggle').addEventListener('click', function(){
+  authMode = (authMode==='signup') ? 'login' : 'signup';
+  renderAuthMode();
 });
 
-/* ---- init ---- */
-(function(){
-  var wantSwitch=/[?&#]switch/.test(location.search+location.hash);
-  var active=getActive();
-  var u=active?findUser(active):null;
-  if(u && !wantSwitch) showPlans(u); else showChooser();
-})();
+$('forgotBtn').addEventListener('click', function(){
+  var email = $('emailField').value.trim();
+  if(!email){ setError('Enter your email above first, then tap Forgot password.'); return; }
+  wtAuth.sendPasswordResetEmail(email)
+    .then(function(){ setError(''); var e=$('authErr'); e.style.color='var(--text-dim)'; e.textContent='Password reset email sent to '+email+'.'; e.style.display='block'; })
+    .catch(function(err){ var e=$('authErr'); e.style.color='var(--down)'; setError(friendly(err)); });
+});
+
+$('logoutBtn').addEventListener('click', function(){ wtAuth.signOut(); });
+
+wtAuth.onAuthStateChanged(function(user){
+  show($('loading'), false);
+  if(user){
+    $('homeUser').textContent = user.displayName || (user.email ? user.email.split('@')[0] : 'Me');
+    show($('authScreen'), false);
+    show($('homeScreen'), true);
+  } else {
+    show($('homeScreen'), false);
+    renderAuthMode();
+    show($('authScreen'), true);
+  }
+});
 </script>
 
 </body>

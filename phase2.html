@@ -51,15 +51,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
 <script src="phases.js"></script>
 <script>
-/* ---- user session guard (per-profile data) ---- */
-var WT_USER = (function(){ try{ return localStorage.getItem('wt-active-user'); }catch(e){ return null; } })();
-if(!WT_USER){ location.replace('index.html'); }
-var WT_KEY = 'wt::' + WT_USER + '::p2';
-var WT_NAME='';
+/* ---- Firebase-backed session (per-account cloud data) ---- */
+var PHASE = 'p2';
+var WT_UID = null, WT_NAME = '', CACHE_KEY = '';
 function wtEsc(s){ return String(s).replace(/[&<>]/g,function(c){ return c==='&'?'&amp;':(c==='<'?'&lt;':'&gt;'); }); }
-(function(){ try{ var us=JSON.parse(localStorage.getItem('wt-users')||'[]'); for(var i=0;i<us.length;i++){ if(us[i].id===WT_USER){ WT_NAME=us[i].name; break; } } }catch(e){} })();
 const EQUIPMENT_OPTIONS = ['Barbell/Bench','Barbell/Rack','Bench','Cable','Floor','Free Weights','Machine','Other'];
 
 function guessEquipment(name){
@@ -146,21 +147,26 @@ function last7Days(){
 }
 
 async function loadData(){
-  try{
-    const raw = localStorage.getItem(WT_KEY);
-    if(raw){ data = JSON.parse(raw); }
-  }catch(e){}
+  var loaded = null, fromCloud = false;
+  try{ loaded = await wtLoadPhase(WT_UID, PHASE); if(loaded) fromCloud = true; }catch(e){}
+  if(!loaded){ try{ const raw = localStorage.getItem(CACHE_KEY); if(raw) loaded = JSON.parse(raw); }catch(e){} }
+  if(!loaded){
+    try{ const oa = localStorage.getItem('wt-active-user'); if(oa){ const r2 = localStorage.getItem('wt::'+oa+'::'+PHASE); if(r2) loaded = JSON.parse(r2); } }catch(e){}
+  }
+  data = loaded || {};
   if(!data.progress) data.progress = {};
   if(!data.swaps) data.swaps = {};
   if(!data.removed) data.removed = {};
   if(!data.customExercises) data.customExercises = {};
   if(!data.calorieUnit) data.calorieUnit = 'kcal';
   if(!data.extraWorkouts) data.extraWorkouts = {};
+  if(!fromCloud && WT_UID) wtSavePhase(WT_UID, PHASE, data);
   render();
   requestAnimationFrame(focusFirstUnstarted);
 }
 async function saveData(){
-  try{ localStorage.setItem(WT_KEY, JSON.stringify(data)); }catch(e){}
+  try{ if(CACHE_KEY) localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
+  if(WT_UID) wtSavePhase(WT_UID, PHASE, data);
 }
 
 function blankSetEntry(ex){
@@ -1292,7 +1298,13 @@ document.addEventListener('focusin', (e)=>{
   t.select();
 });
 
-loadData();
+wtAuth.onAuthStateChanged(function(user){
+  if(!user){ location.replace('index.html'); return; }
+  WT_UID = user.uid;
+  WT_NAME = user.displayName || (user.email ? user.email.split('@')[0] : 'Me');
+  CACHE_KEY = 'wtcache::' + WT_UID + '::' + PHASE;
+  loadData();
+});
 </script>
 </body>
 </html>
