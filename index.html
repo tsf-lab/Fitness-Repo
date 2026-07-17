@@ -49,7 +49,10 @@ input{font-family:'Inter',system-ui,sans-serif;}
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Your profile and workout history sync to your account — open it on any device.</div>
 
     <input id="emailField" class="field" type="email" placeholder="Email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false">
-    <input id="passField" class="field" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+    <div style="position:relative;margin-bottom:10px;">
+      <input id="passField" class="field" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" style="margin-bottom:0;padding-right:46px;">
+      <button id="togglePass" type="button" aria-label="Show password" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--text-faint);padding:8px;display:flex;align-items:center;cursor:pointer;"><i class="ti ti-eye" style="font-size:19px;"></i></button>
+    </div>
 
     <div id="authErr" style="display:none;font-size:12px;color:var(--down);margin:2px 0 12px;"></div>
 
@@ -185,6 +188,15 @@ function doAuth(){
 $('authSubmit').addEventListener('click', doAuth);
 $('emailField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
 $('passField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
+
+$('togglePass').addEventListener('click', function(){
+  var p = $('passField');
+  var showing = (p.type === 'text');
+  p.type = showing ? 'password' : 'text';
+  this.querySelector('i').className = showing ? 'ti ti-eye' : 'ti ti-eye-off';
+  this.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  p.focus();
+});
 
 $('authToggle').addEventListener('click', function(){
   authMode = (authMode==='signup') ? 'login' : 'signup';
