@@ -290,8 +290,8 @@ const PHASES = {
   single({id:'e7',name:'Squat',equip:'Barbell/Rack',muscle:'legs',sets:5,reps:'10',w:true}),
   single({id:'e8',name:'Military Press',equip:'Barbell/Rack',muscle:'shoulders',sets:4,reps:'8-10',w:true}),
   superset('sup2',4,[
-    {id:'e9',name:'Front Raise, Barbell',equip:'Barbell/Rack',muscle:'shoulders',sets:4,reps:'10',w:true},
-    {id:'e10',name:'Upright Row, Barbell',equip:'Barbell/Rack',muscle:'shoulders',sets:4,reps:'12',w:true}
+    {id:'e9',name:'BB Front Raise',equip:'Barbell/Rack',muscle:'shoulders',sets:4,reps:'10',w:true},
+    {id:'e10',name:'BB Upright Row',equip:'Barbell/Rack',muscle:'shoulders',sets:4,reps:'12',w:true}
   ]),
   single({id:'e11',name:'Lateral Raise',equip:'Cable',muscle:'shoulders',sets:5,reps:'12',w:true}),
   single({id:'e12',name:'Arnold Press, Seated',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'8-10',w:true}),
@@ -306,7 +306,7 @@ const PHASES = {
 {id:'s5', title:'Back & Abs', accent:'back', items:[
   single({id:'e1',name:'Pull Down, Wide Grip',equip:'Cable',muscle:'back',sets:7,reps:'8-10',w:true}),
   single({id:'e2',name:'Row, Seated',equip:'Cable',muscle:'back',sets:5,reps:'10-12',w:true}),
-  single({id:'e3',name:'Shrug, Barbell',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'8-10',w:true,note:'HEAVY'}),
+  single({id:'e3',name:'BB Shrug',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'8-10',w:true,note:'HEAVY'}),
   single({id:'e4',name:'Row, One Arm, Seated',equip:'Cable',muscle:'back',sets:4,reps:'10',w:true,note:'Aim for a 1-sec pause on each rep for maximum squeeze'}),
   single({id:'e5',name:'Row, T-Bar',equip:'Barbell/Rack',muscle:'back',sets:5,reps:'8-10',w:true}),
   superset('sup1',4,[
@@ -330,11 +330,11 @@ const PHASES = {
     {id:'e3',name:'Burpee, Kettlebell',equip:'Free Weights',muscle:'cardio',sets:3,reps:'10',w:false},
     {id:'e4',name:'Plank',equip:'Floor',muscle:'core',sets:3,reps:'30 sec',w:false,timed:true,target:30,unit:'sec'}
   ]),
-  single({id:'e5',name:'Squat',equip:'Barbell/Rack',muscle:'legs',sets:5,reps:'10-15',w:true,note:'Lighter weight, full range of motion. Little rest here — breathe during the exercise!'}),
+  single({id:'e5',name:'Squat',equip:'Barbell/Rack',muscle:'legs',sets:5,reps:'10-15',w:true,note:'Lighter weight, full range of motion. Little rest here - breathe during the exercise!'}),
   single({id:'e6',name:'Bench Press',equip:'Bench',muscle:'chest',sets:4,reps:'15',w:true}),
   single({id:'e7',name:'Shoulder Press, Dumbbell, Standing',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'10-15',w:true}),
-  single({id:'e8',name:'Bent Over Row, Barbell',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'10-12',w:true}),
-  single({id:'e9',name:'Lunge, Barbell',equip:'Barbell/Rack',muscle:'legs',sets:3,reps:'20',w:true,note:'10 per leg'}),
+  single({id:'e8',name:'BB Bent Over Row',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'10-12',w:true}),
+  single({id:'e9',name:'BB Lunge',equip:'Barbell/Rack',muscle:'legs',sets:3,reps:'20',w:true,note:'10 per leg'}),
   superset('sup3',3,[
     {id:'e10',name:'Push Up, Military Press',equip:'Floor',muscle:'shoulders',sets:3,reps:'15',w:false},
     {id:'e11',name:'Crunch, Jack Knife, Bent Knees',equip:'Floor',muscle:'core',sets:3,reps:'15',w:false},
