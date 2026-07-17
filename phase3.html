@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phase 2 Workout Tracker</title>
+<title>Phase 3 Workout Tracker</title>
 <style>
 :root{
   --bg:#121316; --surface:#1B1D22; --surface-hi:#25282F; --line:#31343C;
@@ -30,7 +30,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;">
     <div>
       <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.12em;">Bulk</div>
-      <h1 style="font-size:28px;margin:0;line-height:1;">PHASE 2</h1>
+      <h1 style="font-size:28px;margin:0;line-height:1;">PHASE 3</h1>
       <a href="index.html" style="display:inline-flex;align-items:center;gap:4px;margin-top:7px;background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:4px 9px;border-radius:8px;text-decoration:none;"><i class="ti ti-layout-grid" style="font-size:13px;"></i>Plans</a>
     </div>
     <div id="weekRing" style="text-align:right;"></div>
@@ -58,7 +58,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <script src="phases.js"></script>
 <script>
 /* ---- Firebase-backed session (per-account cloud data) ---- */
-var PHASE = 'p2';
+var PHASE = 'p3';
 var WT_UID = null, WT_NAME = '', CACHE_KEY = '';
 function wtEsc(s){ return String(s).replace(/[&<>]/g,function(c){ return c==='&'?'&amp;':(c==='<'?'&lt;':'&gt;'); }); }
 const EQUIPMENT_OPTIONS = ['Barbell/Bench','Barbell/Rack','Bench','Cable','Floor','Free Weights','Machine','Other'];
@@ -83,7 +83,7 @@ const MUSCLE_LABELS = {
 const MUSCLE_ALTS = MASTER_EXERCISE_DB;
 
 const EXERCISE_IMAGES = {};
-const SESSIONS = PHASES.p2;
+const SESSIONS = PHASES.p3;
 
 function findExtraWorkout(id){
   for(const d in data.extraWorkouts){
