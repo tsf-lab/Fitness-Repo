@@ -32,6 +32,18 @@ function wtLoadPhase(uid, phase){
   });
 }
 
+/* Load ALL phases for a user in one read (used for cross-phase training view). */
+function wtLoadAll(uid){
+  return wtUserDoc(uid).get().then(function(snap){
+    var out = {};
+    if(snap.exists){
+      var d = snap.data();
+      ['p1','p2','p3','p4'].forEach(function(k){ if(d[k]){ try{ out[k] = JSON.parse(d[k]); }catch(e){} } });
+    }
+    return out;
+  });
+}
+
 /* Debounced save of one phase's data object. */
 var wtSaveTimers = {};
 function wtSavePhase(uid, phase, dataObj){

@@ -59,7 +59,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <script>
 /* ---- Firebase-backed session (per-account cloud data) ---- */
 var PHASE = 'p3';
-var WT_UID = null, WT_NAME = '', CACHE_KEY = '';
+var WT_UID = null, WT_NAME = '', CACHE_KEY = '', WT_ALL = {};
 function wtEsc(s){ return String(s).replace(/[&<>]/g,function(c){ return c==='&'?'&amp;':(c==='<'?'&lt;':'&gt;'); }); }
 const EQUIPMENT_OPTIONS = ['Barbell/Bench','Barbell/Rack','Bench','Cable','Floor','Free Weights','Machine','Other'];
 
@@ -161,13 +161,17 @@ async function loadData(){
   try{ const raw = localStorage.getItem(CACHE_KEY); if(raw) cached = JSON.parse(raw); }catch(e){}
   if(!cached){ try{ const oa = localStorage.getItem('wt-active-user'); if(oa){ const r2 = localStorage.getItem('wt::'+oa+'::'+PHASE); if(r2) cached = JSON.parse(r2); } }catch(e){} }
   wtApplyData(cached);
+  WT_ALL[PHASE] = data;
   render();
   requestAnimationFrame(focusFirstUnstarted);
-  // Then sync from the cloud (source of truth); seed the cloud if it has nothing yet.
+  // Then sync from the cloud (source of truth); load ALL phases for the cross-phase week view.
   try{
-    const cloud = await wtLoadPhase(WT_UID, PHASE);
-    if(cloud){ wtApplyData(cloud); render(); }
-    else if(WT_UID){ wtSavePhase(WT_UID, PHASE, data); }
+    const all = await wtLoadAll(WT_UID);
+    WT_ALL = all || {};
+    wtApplyData(WT_ALL[PHASE]);
+    WT_ALL[PHASE] = data;
+    render();
+    if(WT_UID && !all[PHASE]) wtSavePhase(WT_UID, PHASE, data);
   }catch(e){}
 }
 async function saveData(){
@@ -282,25 +286,60 @@ function sessionCompletionForDate(sessionId, dateStr){
   return totalSets? doneSets/totalSets : 0;
 }
 
+/* ---- cross-phase training detection (a workout on a day counts across all phases) ---- */
+function wtAnyLogged(rec){
+  if(!rec || !rec.sets) return false;
+  for(var i=0;i<rec.sets.length;i++){ var e=rec.sets[i]||{}; if((e.reps!=null&&e.reps!==''&&e.reps>0)||(e.duration!=null&&e.duration!==''&&e.duration>0)) return true; }
+  return false;
+}
+function wtPhaseTrainedSessions(pdata, dateStr){
+  var res=[]; if(!pdata||!pdata.progress) return res;
+  var prog=pdata.progress;
+  Object.keys(prog).forEach(function(sid){
+    var rec = prog[sid] && prog[sid][dateStr]; if(!rec) return;
+    var t=false; Object.keys(rec).forEach(function(exId){ if(exId.charAt(0)==='_') return; if(wtAnyLogged(rec[exId])) t=true; });
+    if(t) res.push(sid);
+  });
+  return res;
+}
+function crossPhaseOtherDone(dateStr){
+  var out=[]; if(typeof PHASES==='undefined') return out;
+  Object.keys(WT_ALL).forEach(function(pk){
+    if(pk===PHASE) return;
+    var pdata=WT_ALL[pk]; if(!pdata) return;
+    var defs=PHASES[pk]||[];
+    wtPhaseTrainedSessions(pdata,dateStr).forEach(function(sid){
+      for(var i=0;i<defs.length;i++){ if(defs[i].id===sid){ out.push({accent:defs[i].accent,title:defs[i].title}); break; } }
+    });
+  });
+  return out;
+}
+function trainedOnDate(dateStr){
+  if(allSessionsForDate(dateStr).some(function(s){ return sessionCompletionForDate(s.id,dateStr)>0; })) return true;
+  return crossPhaseOtherDone(dateStr).length>0;
+}
+function allTrainedDates(){
+  var set={};
+  Object.keys(data.progress||{}).forEach(function(sid){ Object.keys(data.progress[sid]||{}).forEach(function(d){ set[d]=1; }); });
+  Object.keys(WT_ALL).forEach(function(pk){ var pd=WT_ALL[pk]; if(!pd||!pd.progress) return; Object.keys(pd.progress).forEach(function(sid){ Object.keys(pd.progress[sid]||{}).forEach(function(d){ set[d]=1; }); }); });
+  return Object.keys(set);
+}
+
 function weekSummary(){
   const days = last7Days();
   let anyComplete = 0;
   days.forEach(d=>{
-    let done = allSessionsForDate(d).some(s=> sessionCompletionForDate(s.id,d) > 0 );
-    if(done) anyComplete++;
+    if(trainedOnDate(d)) anyComplete++;
   });
   return {days, anyComplete};
 }
 
 function trainingStats(){
-  const allDates = new Set();
-  Object.keys(data.progress).forEach(sessionId=>{
-    Object.keys(data.progress[sessionId]||{}).forEach(d=> allDates.add(d));
-  });
+  const allDates = allTrainedDates();
   let trained = 0;
   const trainedDates = [];
   allDates.forEach(d=>{
-    if(allSessionsForDate(d).some(s=> sessionCompletionForDate(s.id,d) > 0)){ trained++; trainedDates.push(d); }
+    if(trainedOnDate(d)){ trained++; trainedDates.push(d); }
   });
   let spanDays = 0, firstDate = null, lastDate = null;
   if(trainedDates.length){
@@ -356,10 +395,11 @@ function renderWeekStrip(){
   days.forEach((d,i)=>{
     const isToday = d===todayStr;
     const isSelected = d===selectedDate;
-    const doneList = allSessionsForDate(d)
-      .map(s=> ({s, c: sessionCompletionForDate(s.id,d)}))
-      .filter(x=> x.c>0)
-      .sort((a,b)=> b.c-a.c);
+    let doneList = allSessionsForDate(d)
+      .map(s=> ({accent:s.accent, title:s.title, c: sessionCompletionForDate(s.id,d)}))
+      .filter(x=> x.c>0);
+    crossPhaseOtherDone(d).forEach(function(o){ doneList.push({accent:o.accent, title:o.title, c:1}); });
+    doneList.sort((a,b)=> b.c-a.c);
     const border = isSelected ? '2px solid var(--text)' : (isToday ? '1.5px solid var(--text-dim)' : '0.5px solid var(--line)');
     let inner;
     if(doneList.length===0){
@@ -367,8 +407,8 @@ function renderWeekStrip(){
     } else {
       inner = '<div style="display:flex;flex-direction:column;gap:2px;border-radius:7px;overflow:hidden;border:'+border+';">'+
         doneList.map(x=>
-          '<div style="height:16px;display:flex;align-items:center;justify-content:center;opacity:'+(0.35+Math.min(x.c,1)*0.65).toFixed(2)+';background:var(--'+x.s.accent+');">'+
-            '<span style="font-size:7px;font-weight:700;color:#121316;line-height:1;">'+shortLabel(x.s.title)+'</span>'+
+          '<div style="height:16px;display:flex;align-items:center;justify-content:center;opacity:'+(0.35+Math.min(x.c,1)*0.65).toFixed(2)+';background:var(--'+x.accent+');">'+
+            '<span style="font-size:7px;font-weight:700;color:#121316;line-height:1;">'+shortLabel(x.title)+'</span>'+
           '</div>'
         ).join('')+
       '</div>';
