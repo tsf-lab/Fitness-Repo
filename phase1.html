@@ -502,7 +502,15 @@ function renderWeekStrip(){
   strip.style.flexDirection = 'column';
   strip.innerHTML = html;
   document.querySelectorAll('[data-pickday]').forEach(btn=>{
-    btn.onclick = ()=>{ selectedDate = btn.dataset.pickday; render(); };
+    btn.onclick = ()=>{
+      selectedDate = btn.dataset.pickday;
+      if(sessionCompletionForDate(currentSession, selectedDate) === 0){
+        var best=null, bestC=0;
+        SESSIONS.forEach(function(s){ var c=sessionCompletionForDate(s.id, selectedDate); if(c>bestC){ bestC=c; best=s.id; } });
+        if(best) currentSession = best;
+      }
+      render();
+    };
   });
   document.getElementById('weekPrev').onclick = ()=>{ weekOffset -= 1; render(); };
   document.getElementById('weekNext').onclick = ()=>{ if(weekOffset<0){ weekOffset += 1; render(); } };
@@ -688,7 +696,7 @@ function leafCardHTML(sessionId, ex, bg){
   if(!rec.removedSetIdx) rec.removedSetIdx = [];
   const isFullyComplete = targetSetCount(rec, ex) > 0 && completionCount(rec, ex) >= targetSetCount(rec, ex);
   const cardKey = sessionId+'-'+ex.id+'-'+selectedDate;
-  if(isFullyComplete && !expandedOverrides.has(cardKey)){
+  if(isFullyComplete && !expandedOverrides.has(cardKey) && selectedDate===todayStr){
     return '<div style="background:'+bg+';border-radius:12px;padding:10px 12px;border-left:3px solid '+color+';display:flex;align-items:center;gap:8px;opacity:0.75;">'+
       '<i class="ti ti-check" style="font-size:15px;color:var(--up);flex:0 0 auto;"></i>'+
       '<span style="display:inline-block;font-size:9px;padding:2px 6px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;flex:0 0 auto;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
