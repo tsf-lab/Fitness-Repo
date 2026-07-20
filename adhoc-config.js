@@ -33,21 +33,27 @@
    ===================================================================== */
 
 var FOCUS_CHIPS = [
-  { key:'legs', label:'Legs' },
-  { key:'chest', label:'Chest' },
-  { key:'back', label:'Back' },
+  { key:'full',      label:'Full' },
+  { key:'onlydumbs', label:'OnlyDumbs' },
+  { key:'upper',     label:'Upper' },
+  { key:'chest',     label:'Chest' },
+  { key:'back',      label:'Back' },
   { key:'shoulders', label:'Shoulders' },
-  { key:'arms', label:'Arms' },
-  { key:'core', label:'Core' },
-  { key:'cardio', label:'Conditioning' }
+  { key:'arms',      label:'Biceps' },
+  { key:'legs',      label:'Legs' },
+  { key:'lower',     label:'Lower' },
+  { key:'core',      label:'Core' }
 ];
 
 var FOCUS_WORKOUTS = {
-  legs: ['p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)', 'p4 | Lower'],
-  chest: ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs'],
-  back: ['p1 | Back & Abs', 'p2 | Back & Triceps', 'p3 | Back & Abs'],
+  full:      ['p1 | Full Upper', 'p2 | Full Body', 'p4 | Strength'],
+  onlydumbs: [],
+  upper:     ['p1 | Full Upper', 'p4 | Upper'],
+  chest:     ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs'],
+  back:      ['p1 | Back & Abs', 'p2 | Back & Triceps', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs'],
   shoulders: ['p1 | Shoulders & Biceps', 'p2 | Shoulders & Abs', 'p3 | Shoulders & Squats', 'p4 | Shoulders, Arms & Abs'],
-  arms: ['p1 | Full Upper', 'p2 | Full Body', 'p4 | Strength'],
-  core: [],
-  cardio: ['p3 | Conditioning Work']
+  arms:      ['p1 | Shoulders & Biceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Shoulders, Arms & Abs', 'p4 | Strength'],
+  legs:      ['p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)', 'p4 | Lower'],
+  lower:     ['p4 | Lower', 'p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)'],
+  core:      ['p1 | Back & Abs', 'p2 | Shoulders & Abs', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p4 | Shoulders, Arms & Abs']
 };
