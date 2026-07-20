@@ -224,18 +224,21 @@ async function loadData(){
   var cached = null;
   try{ const raw = localStorage.getItem(CACHE_KEY); if(raw) cached = JSON.parse(raw); }catch(e){}
   if(!cached){ try{ const oa = localStorage.getItem('wt-active-user'); if(oa){ const r2 = localStorage.getItem('wt::'+oa+'::'+PHASE); if(r2) cached = JSON.parse(r2); } }catch(e){} }
+  // Seed the cross-phase view from every phase's on-device cache (works without cloud).
+  WT_ALL = {};
+  ['p1','p2','p3','p4'].forEach(function(pk){ try{ var r=localStorage.getItem('wtcache::'+WT_UID+'::'+pk); if(r) WT_ALL[pk]=JSON.parse(r); }catch(e){} });
   wtApplyData(cached);
   WT_ALL[PHASE] = data;
   render();
   requestAnimationFrame(focusFirstUnstarted);
-  // Then sync from the cloud (source of truth); load ALL phases for the cross-phase week view.
+  // Then sync from the cloud; merge cloud phases over the local caches.
   try{
     const all = await wtLoadAll(WT_UID);
-    WT_ALL = all || {};
+    if(all) Object.keys(all).forEach(function(pk){ WT_ALL[pk] = all[pk]; });
     wtApplyData(WT_ALL[PHASE]);
     WT_ALL[PHASE] = data;
     render();
-    if(WT_UID && !all[PHASE]) wtSavePhase(WT_UID, PHASE, data);
+    if(WT_UID && (!all || !all[PHASE])) wtSavePhase(WT_UID, PHASE, data);
   }catch(e){}
 }
 async function saveData(){
