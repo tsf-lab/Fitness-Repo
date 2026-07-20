@@ -264,6 +264,25 @@ var FOCUS_ORDER = ['legs','chest','back','shoulders','arms','core','cardio'];
 var FOCUS_LABEL = {legs:'Legs',chest:'Chest',back:'Back',shoulders:'Shoulders',arms:'Arms',core:'Core',cardio:'Conditioning'};
 var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); });
 var adhocFocus = null;
+var adhocExpanded = {};
+function exLine(ex, indent){
+  var amt = ex.timed ? (ex.sets+' × '+ex.target+' '+ex.unit) : (ex.sets+' × '+ex.reps);
+  return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;'+(indent?'padding-left:12px;':'')+'">'+
+    '<span style="color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(ex.name)+'</span>'+
+    '<span style="color:var(--text-faint);flex:0 0 auto;">'+esc(amt)+'</span>'+
+  '</div>';
+}
+function sessionBreakdownHTML(session){
+  var rows='';
+  session.items.forEach(function(it){
+    if(it.type==='single'){ rows += exLine(it.ex, false); }
+    else {
+      rows += '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;margin:5px 0 1px;">Superset · '+it.rounds+' rounds</div>';
+      it.subs.forEach(function(sub){ rows += exLine(sub, true); });
+    }
+  });
+  return rows;
+}
 function sessionsByFocus(){
   var map={}; if(typeof PHASES==='undefined') return map;
   Object.keys(PLAN_META).forEach(function(pk){
@@ -282,19 +301,29 @@ function renderAdhoc(){
   if(adhocFocus && byF[adhocFocus]){
     byF[adhocFocus].forEach(function(o){
       var meta=PLAN_META[o.phase];
-      sess += '<a href="tracker.html?phase='+o.phase+'&session='+o.sid+'" style="text-decoration:none;color:inherit;">'+
-        '<div class="plancard" style="border-left:3px solid var(--'+meta.accent+');">'+
-          '<div style="flex:1;min-width:0;">'+
+      var sessionObj=null, defs=(typeof PHASES!=='undefined'&&PHASES[o.phase])?PHASES[o.phase]:[];
+      for(var i=0;i<defs.length;i++){ if(defs[i].id===o.sid){ sessionObj=defs[i]; break; } }
+      var key=o.phase+'|'+o.sid, open=!!adhocExpanded[key];
+      sess += '<div style="background:var(--surface);border:0.5px solid var(--line);border-left:3px solid var(--'+meta.accent+');border-radius:14px;margin-bottom:11px;overflow:hidden;">'+
+        '<button data-toggle="'+key+'" style="width:100%;background:transparent;border:0;color:inherit;text-align:left;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;">'+
+          '<div style="min-width:0;">'+
             '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">'+phaseToProgram[o.phase]+' · '+meta.title+'</div>'+
-            '<h2 style="font-size:20px;margin:2px 0 0;line-height:1;">'+esc(o.title)+'</h2>'+
-          '</div><i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);flex:0 0 auto;"></i>'+
-        '</div></a>';
+            '<div style="font-size:20px;font-weight:700;line-height:1;margin-top:2px;">'+esc(o.title)+'</div>'+
+          '</div>'+
+          '<i class="ti ti-chevron-'+(open?'up':'down')+'" style="font-size:20px;color:var(--text-faint);flex:0 0 auto;"></i>'+
+        '</button>'+
+        (open && sessionObj ? '<div style="padding:0 16px 14px;">'+
+            '<div style="border-top:0.5px solid var(--line);padding-top:10px;">'+sessionBreakdownHTML(sessionObj)+'</div>'+
+            '<a href="tracker.html?phase='+o.phase+'&session='+o.sid+'" style="display:block;text-align:center;margin-top:12px;background:var(--'+meta.accent+');color:#121316;font-weight:600;font-size:14px;padding:10px;border-radius:10px;text-decoration:none;">Start this workout</a>'+
+          '</div>' : '')+
+      '</div>';
     });
   } else {
     sess='<div style="font-size:12px;color:var(--text-faint);">Choose a focus above to see every matching workout across all phases.</div>';
   }
   $('focusSessions').innerHTML=sess;
   document.querySelectorAll('[data-focus]').forEach(function(b){ b.onclick=function(){ adhocFocus=b.getAttribute('data-focus'); renderAdhoc(); }; });
+  document.querySelectorAll('[data-toggle]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-toggle'); adhocExpanded[k]=!adhocExpanded[k]; renderAdhoc(); }; });
 }
 $('adhocBack').addEventListener('click', function(){ show($('adhocScreen'),false); show($('homeScreen'),true); });
 
