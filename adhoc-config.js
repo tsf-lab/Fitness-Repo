@@ -35,7 +35,6 @@
 var FOCUS_CHIPS = [
   { key:'full',      label:'Full' },
   { key:'onlydumbs', label:'OnlyDumbs' },
-  { key:'upper',     label:'Upper' },
   { key:'chest',     label:'Chest' },
   { key:'back',      label:'Back' },
   { key:'shoulders', label:'Shoulders' },
@@ -45,9 +44,8 @@ var FOCUS_CHIPS = [
 ];
 
 var FOCUS_WORKOUTS = {
-  full:      ['p2 | Full Body', 'p4 | Strength', 'p3 | Conditioning Work', 'p5 | DB Blaster (Full Body)'],
+  full:      ['p2 | Full Body', 'p4 | Strength', 'p1 | Full Upper', 'p4 | Upper', 'p3 | Conditioning Work', 'p5 | DB Blaster (Full Body)'],
   onlydumbs: ['p5 | DB Push Day', 'p5 | DB Pull Day', 'p5 | DB Blaster (Full Body)'],
-  upper:     ['p1 | Full Upper', 'p4 | Upper', 'p5 | DB Push Day', 'p5 | DB Pull Day', 'p5 | DB Blaster (Full Body)'],
   chest:     ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs', 'p5 | DB Push Day', 'p5 | Chest Big Push', 'p5 | Chest Best Day', 'p5 | Chest All the Angles'],
   back:      ['p1 | Back & Abs', 'p2 | Back & Triceps', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p5 | DB Pull Day', 'p5 | Back & Biceps Blast', 'p5 | Back & Biceps Annihilation', 'p5 | Wings Day (Back and Biceps)'],
   shoulders: ['p1 | Shoulders & Biceps', 'p2 | Shoulders & Abs', 'p3 | Shoulders & Squats', 'p4 | Shoulders, Arms & Abs', 'p5 | Boulder Shoulders', 'p5 | Arm Push (Shoulders & Tris)', 'p5 | No Needs Sleeves (Shoulders & Tris)'],
