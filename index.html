@@ -99,7 +99,7 @@ input{font-family:'Inter',system-ui,sans-serif;}
 
 <script>
 /* ---------- config ---------- */
-var PROGRAMS = [ {name:'Bulk', phases:['p1','p2','p3']}, {name:'Shred', phases:['p4']}, {name:'SB', phases:['p5']} ];
+var PROGRAMS = [ {name:'Bulk', phases:['p1','p2','p3']}, {name:'Shred', phases:['p4']} ];
 var PLAN_META = {
   p1:{title:'PHASE 1', accent:'p1', focus:'Legs · Chest & Triceps · Back & Abs · Shoulders & Biceps · Full Upper'},
   p2:{title:'PHASE 2', accent:'p2', focus:'Chest · Back · Shoulders · Legs · Full Body'},
@@ -210,7 +210,7 @@ function computePhaseStatus(pk){
 function renderHome(){
   // Continue hero: the phase trained most recently, and its next session
   var activePk=null, activeLast='';
-  Object.keys(PLAN_META).forEach(function(pk){ var st=computePhaseStatus(pk); if(st.last && st.last>activeLast){ activeLast=st.last; activePk=pk; } });
+  Object.keys(PLAN_META).forEach(function(pk){ if(pk==='p5') return; var st=computePhaseStatus(pk); if(st.last && st.last>activeLast){ activeLast=st.last; activePk=pk; } });
   var heroHtml='';
   if(activePk){
     var st=computePhaseStatus(activePk), meta=PLAN_META[activePk];
@@ -263,7 +263,7 @@ function renderHome(){
 }
 
 /* ---------- ad hoc ---------- */
-var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); });
+var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); }); phaseToProgram['p5']='SB';
 var adhocFocus = null;
 var adhocExpanded = {};
 function exLine(ex, indent){
