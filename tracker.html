@@ -480,16 +480,54 @@ function renderWeekStrip(){
   document.getElementById('weekLabel').onclick = ()=>{ if(weekOffset!==0){ weekOffset = 0; render(); } };
 }
 
+function adhocWorkoutsFor(focus){
+  var list = (typeof FOCUS_WORKOUTS!=='undefined' && FOCUS_WORKOUTS[focus]) ? FOCUS_WORKOUTS[focus] : [];
+  var out=[];
+  list.forEach(function(entry){
+    var bar = entry.indexOf('|');
+    if(bar<0) return;
+    var ph = entry.slice(0,bar).replace(/\s+/g,'');
+    var title = entry.slice(bar+1).replace(/^\s+|\s+$/g,'');
+    var sessions = (typeof PHASES!=='undefined' && PHASES[ph]) ? PHASES[ph] : [];
+    for(var i=0;i<sessions.length;i++){
+      if(sessions[i].title===title){ out.push({phase:ph, session:sessions[i].id, title:title, accent:sessions[i].accent}); break; }
+    }
+  });
+  return out;
+}
+function adhocPhaseTag(ph){
+  var meta=(typeof PHASE_META!=='undefined' && PHASE_META[ph])?PHASE_META[ph]:null;
+  if(!meta) return ph;
+  return ph==='p5' ? meta.label : (meta.label+' '+ph.replace('p',''));
+}
 function renderFocusChips(){
   var chips=(typeof FOCUS_CHIPS!=='undefined')?FOCUS_CHIPS:[];
   var cur = getSessionObj(currentSession);
   var curFocus = WT_ADHOC_FOCUS || (cur ? cur.accent : '');
-  var html='';
+  var chipHtml='';
   chips.forEach(function(c){
     var f=c.key, on=(f===curFocus);
-    html += '<a href="index.html?adhoc='+f+'" style="flex:0 0 auto;padding:8px 12px;border-radius:10px;border:1.5px solid '+(on?'var(--'+f+', var(--text-dim))':'var(--line)')+';background:'+(on?'var(--'+f+', var(--text-dim))':'var(--surface)')+';color:'+(on?'#121316':'var(--text)')+';font-size:12px;font-weight:600;white-space:nowrap;text-decoration:none;">'+wtEsc(c.label)+'</a>';
+    var ws=adhocWorkoutsFor(f);
+    var href = ws.length ? ('tracker.html?phase='+ws[0].phase+'&session='+ws[0].session+'&adhoc='+f) : ('index.html?adhoc='+f);
+    chipHtml += '<a href="'+href+'" style="flex:0 0 auto;padding:8px 12px;border-radius:10px;border:1.5px solid '+(on?'var(--'+f+', var(--text-dim))':'var(--line)')+';background:'+(on?'var(--'+f+', var(--text-dim))':'var(--surface)')+';color:'+(on?'#121316':'var(--text)')+';font-size:12px;font-weight:600;white-space:nowrap;text-decoration:none;">'+wtEsc(c.label)+'</a>';
   });
-  document.getElementById('dayTabs').innerHTML = html;
+  var ws=adhocWorkoutsFor(curFocus);
+  var woHtml='';
+  ws.forEach(function(w){
+    var active=(w.phase===PHASE && w.session===currentSession);
+    var color='var(--'+curFocus+', var(--text-dim))';
+    woHtml += '<a href="tracker.html?phase='+w.phase+'&session='+w.session+'&adhoc='+curFocus+'" style="flex:0 0 auto;padding:7px 11px;border-radius:10px;border:1.5px solid '+(active?color:'var(--line)')+';background:'+(active?color:'var(--surface)')+';color:'+(active?'#121316':'var(--text)')+';font-size:12px;font-weight:600;white-space:nowrap;text-decoration:none;display:flex;flex-direction:column;line-height:1.2;">'+
+      '<span>'+wtEsc(w.title)+'</span>'+
+      '<span style="font-size:9px;opacity:0.65;font-weight:500;">'+wtEsc(adhocPhaseTag(w.phase))+'</span>'+
+    '</a>';
+  });
+  var out='<div style="display:flex;flex-direction:column;gap:8px;width:100%;">'+
+    '<div style="display:flex;gap:8px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;">'+chipHtml+'</div>';
+  if(woHtml){
+    out += '<div style="display:flex;gap:8px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;">'+woHtml+'</div>';
+  }
+  out += '</div>';
+  document.getElementById('dayTabs').innerHTML = out;
 }
 function renderDayTabs(){
   if(WT_ADHOC){ renderFocusChips(); return; }
