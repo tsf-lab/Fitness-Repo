@@ -45,13 +45,13 @@ var FOCUS_CHIPS = [
 ];
 
 var FOCUS_WORKOUTS = {
-  full:      ['p2 | Full Body', 'p4 | Strength', 'p3 | Conditioning Work'],
-  onlydumbs: [],
-  upper:     ['p1 | Full Upper', 'p4 | Upper'],
-  chest:     ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs'],
-  back:      ['p1 | Back & Abs', 'p2 | Back & Triceps', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs'],
-  shoulders: ['p1 | Shoulders & Biceps', 'p2 | Shoulders & Abs', 'p3 | Shoulders & Squats', 'p4 | Shoulders, Arms & Abs'],
-  arms:      ['p1 | Shoulders & Biceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Shoulders, Arms & Abs', 'p4 | Strength'],
-  legs:      ['p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)', 'p4 | Lower'],
-  core:      ['p1 | Back & Abs', 'p2 | Shoulders & Abs', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p4 | Shoulders, Arms & Abs']
+  full:      ['p2 | Full Body', 'p4 | Strength', 'p3 | Conditioning Work', 'p5 | DB Blaster (Full Body)'],
+  onlydumbs: ['p5 | DB Push Day', 'p5 | DB Pull Day', 'p5 | DB Blaster (Full Body)'],
+  upper:     ['p1 | Full Upper', 'p4 | Upper', 'p5 | DB Push Day', 'p5 | DB Pull Day', 'p5 | DB Blaster (Full Body)'],
+  chest:     ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs', 'p5 | DB Push Day', 'p5 | Chest Big Push', 'p5 | Chest Best Day', 'p5 | Chest All the Angles'],
+  back:      ['p1 | Back & Abs', 'p2 | Back & Triceps', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p5 | DB Pull Day', 'p5 | Back & Biceps Blast', 'p5 | Back & Biceps Annihilation', 'p5 | Wings Day (Back and Biceps)'],
+  shoulders: ['p1 | Shoulders & Biceps', 'p2 | Shoulders & Abs', 'p3 | Shoulders & Squats', 'p4 | Shoulders, Arms & Abs', 'p5 | Boulder Shoulders', 'p5 | Arm Push (Shoulders & Tris)', 'p5 | No Needs Sleeves (Shoulders & Tris)'],
+  arms:      ['p1 | Shoulders & Biceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Shoulders, Arms & Abs', 'p4 | Strength', 'p5 | Biceppies', 'p5 | Back & Biceps Blast', 'p5 | Back & Biceps Annihilation', 'p5 | Wings Day (Back and Biceps)', 'p5 | DB Pull Day', 'p5 | Arm Push (Shoulders & Tris)'],
+  legs:      ['p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)', 'p4 | Lower', 'p5 | Leg Annihilation', 'p5 | Legs for Days', 'p5 | Legs Posterior Peach Focus', 'p5 | Booty - Thick Thighs save Lives'],
+  core:      ['p1 | Back & Abs', 'p2 | Shoulders & Abs', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p4 | Shoulders, Arms & Abs', 'p5 | Bulletproof Core']
 };

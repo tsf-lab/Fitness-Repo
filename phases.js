@@ -423,6 +423,189 @@ const PHASES = {
     {id:'e14',name:'Front Raise, Plate',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'10',w:true}
   ])
 ]}
+  ],
+  p5: [
+{id:'s1', title:'DB Push Day', accent:'chest', items:[
+  single({id:'e1',name:'Incline push up',equip:'Other',muscle:'chest',sets:3,reps:'20',w:false}),
+  single({id:'e2',name:'Bench dips',equip:'Other',muscle:'chest',sets:4,reps:'25',w:false}),
+  single({id:'e3',name:'Dumbbell seated shoulder press',equip:'Free Weights',muscle:'chest',sets:4,reps:'10-12',w:true}),
+  single({id:'e4',name:'Dumbbell Chest Press to Hex Press',equip:'Free Weights',muscle:'chest',sets:4,reps:'12',w:true}),
+  single({id:'e5',name:'Dumbbell skull crushers',equip:'Free Weights',muscle:'chest',sets:3,reps:'15',w:true}),
+  single({id:'e6',name:'Dumbbell seated lateral raise/front raise',equip:'Free Weights',muscle:'chest',sets:4,reps:'10',w:true}),
+  single({id:'e7',name:'Knees to Chest- bench',equip:'Other',muscle:'chest',sets:3,reps:'20',w:false}),
+  single({id:'e8',name:'Side plank dips (bench)',equip:'Other',muscle:'chest',sets:3,reps:'15',w:false})
+]},
+{id:'s2', title:'DB Pull Day', accent:'back', items:[
+  single({id:'e1',name:'Leaning Trap 3 Raise',equip:'Free Weights',muscle:'back',sets:3,reps:'10',w:true}),
+  single({id:'e2',name:'Dumbbell bent over row',equip:'Free Weights',muscle:'back',sets:4,reps:'10-15',w:true}),
+  single({id:'e3',name:'Dumbbell incline curls',equip:'Free Weights',muscle:'back',sets:4,reps:'12-15',w:true}),
+  single({id:'e4',name:'Dumbbell leaning reverse fly',equip:'Free Weights',muscle:'back',sets:4,reps:'8-12',w:true}),
+  single({id:'e5',name:'Dumbbell concentration curl',equip:'Free Weights',muscle:'back',sets:4,reps:'10-15',w:true}),
+  single({id:'e6',name:'Seated dumbbell good mornings',equip:'Free Weights',muscle:'back',sets:3,reps:'15',w:true}),
+  single({id:'e7',name:'Dumbbell Hammer Curl/Hold',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true})
+]},
+{id:'s3', title:'DB Blaster (Full Body)', accent:'arms', items:[
+  single({id:'e1',name:'Dumbbell thruster',equip:'Free Weights',muscle:'arms',sets:4,reps:'15',w:true}),
+  single({id:'e2',name:'Dumbbell Reverse Lunge w/ Curl',equip:'Free Weights',muscle:'arms',sets:4,reps:'15',w:true}),
+  single({id:'e3',name:'Dumbbell renegade row + push-up',equip:'Free Weights',muscle:'arms',sets:4,reps:'12',w:true}),
+  single({id:'e4',name:'Dumbbell neutral grip shoulder press to triceps extension',equip:'Free Weights',muscle:'arms',sets:4,reps:'10',w:true})
+]},
+{id:'s4', title:'Boulder Shoulders', accent:'shoulders', items:[
+  single({id:'e1',name:'Diamond push ups',equip:'Other',muscle:'shoulders',sets:3,reps:'15',w:false}),
+  single({id:'e2',name:'Dumbbell seated shoulder press',equip:'Free Weights',muscle:'shoulders',sets:5,reps:'8-12',w:true}),
+  superset('sup3',4,[
+    {id:'e3',name:'Dumbbell skull crushers',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'12',w:true},
+    {id:'e4',name:'Dumbbell lateral raises',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'12',w:true}
+  ]),
+  single({id:'e5',name:'Plate loaded machine shoulder press',equip:'Machine',muscle:'shoulders',sets:4,reps:'12-15',w:true}),
+  single({id:'e6',name:'Cable Rope Front Raise',equip:'Cable',muscle:'shoulders',sets:4,reps:'10-12',w:true}),
+  single({id:'e7',name:'Decline push up',equip:'Other',muscle:'shoulders',sets:3,reps:'20',w:false})
+]},
+{id:'s5', title:'Arm Push (Shoulders & Tris)', accent:'shoulders', items:[
+  single({id:'e1',name:'Dips',equip:'Other',muscle:'shoulders',sets:5,reps:'10-15',w:false}),
+  single({id:'e2',name:'Barbell shoulder press',equip:'Barbell/Rack',muscle:'shoulders',sets:5,reps:'8-15',w:true}),
+  single({id:'e3',name:'Cable rope triceps extensions',equip:'Cable',muscle:'shoulders',sets:4,reps:'12',w:true}),
+  single({id:'e4',name:'Dumbbell lateral raise to front raise',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'4-6',w:true}),
+  single({id:'e5',name:'EZ-bar skull crushers',equip:'Barbell/Rack',muscle:'shoulders',sets:4,reps:'10-15',w:true}),
+  single({id:'e6',name:'Dumbbell single-arm shoulder press',equip:'Free Weights',muscle:'shoulders',sets:4,reps:'8-12',w:true})
+]},
+{id:'s6', title:'No Needs Sleeves (Shoulders & Tris)', accent:'shoulders', items:[
+  superset('sup1',3,[
+    {id:'e1',name:'Diamond push ups',equip:'Other',muscle:'shoulders',sets:3,reps:'15',w:false},
+    {id:'e2',name:'Decline push up',equip:'Other',muscle:'shoulders',sets:3,reps:'15',w:false}
+  ]),
+  single({id:'e3',name:'Barbell shoulder press',equip:'Barbell/Rack',muscle:'shoulders',sets:5,reps:'8-12',w:true}),
+  single({id:'e4',name:'Dips',equip:'Other',muscle:'shoulders',sets:4,reps:'10-12',w:false}),
+  single({id:'e5',name:'Dumbbell seated lateral raise/front raise',equip:'Free Weights',muscle:'shoulders',sets:3,reps:'8',w:true}),
+  single({id:'e6',name:'Cable rope triceps extensions',equip:'Cable',muscle:'shoulders',sets:4,reps:'10-15',w:true}),
+  single({id:'e7',name:'Cable Rope Front Raise',equip:'Cable',muscle:'shoulders',sets:4,reps:'12',w:true}),
+  single({id:'e8',name:'Bench dips',equip:'Other',muscle:'shoulders',sets:4,reps:'25',w:false})
+]},
+{id:'s7', title:'Chest Big Push', accent:'chest', items:[
+  single({id:'e1',name:'Push-ups',equip:'Other',muscle:'chest',sets:3,reps:'15-25',w:false}),
+  single({id:'e2',name:'Barbell decline bench press',equip:'Barbell/Rack',muscle:'chest',sets:5,reps:'10-15',w:true}),
+  single({id:'e3',name:'Decline cable fly',equip:'Cable',muscle:'chest',sets:4,reps:'10-12',w:true}),
+  superset('sup4',4,[
+    {id:'e4',name:'Dumbbell Low-to-High Fly',equip:'Free Weights',muscle:'chest',sets:4,reps:'20',w:true},
+    {id:'e5',name:'Incline dumbbell chest press',equip:'Free Weights',muscle:'chest',sets:4,reps:'15',w:true}
+  ]),
+  single({id:'e6',name:'Landmine Chest Press',equip:'Barbell/Rack',muscle:'chest',sets:3,reps:'15',w:true}),
+  single({id:'e7',name:'Cable chest fly',equip:'Cable',muscle:'chest',sets:3,reps:'12',w:true})
+]},
+{id:'s8', title:'Chest Best Day', accent:'chest', items:[
+  single({id:'e1',name:'Push-ups',equip:'Other',muscle:'chest',sets:3,reps:'20',w:false}),
+  single({id:'e2',name:'Barbell bench press',equip:'Barbell/Rack',muscle:'chest',sets:5,reps:'6-15',w:true}),
+  single({id:'e3',name:'Cable chest fly',equip:'Cable',muscle:'chest',sets:4,reps:'8-12',w:true}),
+  single({id:'e4',name:'Incline dumbbell chest press',equip:'Free Weights',muscle:'chest',sets:4,reps:'10-15',w:true}),
+  superset('sup5',3,[
+    {id:'e5',name:'Dumbbell Low-to-High Fly',equip:'Free Weights',muscle:'chest',sets:3,reps:'20',w:true},
+    {id:'e6',name:'Landmine Chest Press',equip:'Barbell/Rack',muscle:'chest',sets:3,reps:'12',w:true}
+  ]),
+  single({id:'e7',name:'Incline dumbbell fly',equip:'Free Weights',muscle:'chest',sets:4,reps:'10-12',w:true})
+]},
+{id:'s9', title:'Chest All the Angles', accent:'chest', items:[
+  single({id:'e1',name:'Push-ups',equip:'Other',muscle:'chest',sets:3,reps:'20',w:false}),
+  single({id:'e2',name:'Barbell decline bench press',equip:'Barbell/Rack',muscle:'chest',sets:5,reps:'10-12',w:true}),
+  single({id:'e3',name:'Decline cable fly',equip:'Cable',muscle:'chest',sets:4,reps:'10',w:true}),
+  single({id:'e4',name:'Incline bench press (barbell)',equip:'Barbell/Rack',muscle:'chest',sets:5,reps:'10-15',w:true}),
+  single({id:'e5',name:'cable incline chest fly',equip:'Cable',muscle:'chest',sets:4,reps:'8-10',w:true}),
+  single({id:'e6',name:'Offset Incline Ball Push Up',equip:'Other',muscle:'chest',sets:3,reps:'10',w:false})
+]},
+{id:'s10', title:'Biceppies', accent:'arms', items:[
+  single({id:'e1',name:'Barbell bicep curls',equip:'Barbell/Rack',muscle:'arms',sets:5,reps:'8-15',w:true}),
+  single({id:'e2',name:'Cable Single Arm Bicep Curl',equip:'Cable',muscle:'arms',sets:4,reps:'10-12',w:true}),
+  single({id:'e3',name:'Reverse curl',equip:'Free Weights',muscle:'arms',sets:3,reps:'12',w:true}),
+  single({id:'e4',name:'Dumbbell hammer curls w/hold',equip:'Free Weights',muscle:'arms',sets:4,reps:'10-12',w:true}),
+  superset('sup5',3,[
+    {id:'e5',name:'Wrist Curl',equip:'Free Weights',muscle:'arms',sets:3,reps:'30',w:true},
+    {id:'e6',name:'Reverse wrist curl',equip:'Free Weights',muscle:'arms',sets:3,reps:'25',w:true}
+  ])
+]},
+{id:'s11', title:'Back & Biceps Blast', accent:'back', items:[
+  single({id:'e1',name:'Pull-up',equip:'Other',muscle:'back',sets:5,reps:'8-12',w:false}),
+  single({id:'e2',name:'EZ bar bicep curls',equip:'Barbell/Rack',muscle:'back',sets:5,reps:'8-15',w:true}),
+  single({id:'e3',name:'Dumbbell single arm row',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true}),
+  superset('sup4',4,[
+    {id:'e4',name:'Single Arm Cable Row',equip:'Cable',muscle:'back',sets:4,reps:'12',w:true},
+    {id:'e5',name:'Zotman curl',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true}
+  ]),
+  single({id:'e6',name:'Standing cable pulldown',equip:'Cable',muscle:'back',sets:4,reps:'8-10',w:true}),
+  single({id:'e7',name:'Dumbbell incline curls',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true}),
+  single({id:'e8',name:'Wall Elbow Press',equip:'Other',muscle:'back',sets:3,reps:'60 sec',w:false,timed:true,target:60,unit:'sec'})
+]},
+{id:'s12', title:'Back & Biceps Annihilation', accent:'back', items:[
+  single({id:'e1',name:'Bent over barbell row',equip:'Barbell/Rack',muscle:'back',sets:5,reps:'8-12',w:true}),
+  single({id:'e2',name:'Seated cable row',equip:'Cable',muscle:'back',sets:4,reps:'8-12',w:true}),
+  single({id:'e3',name:'preacher curl narrow grip',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'10-15',w:true}),
+  superset('sup4',4,[
+    {id:'e4',name:'Dumbbell leaning reverse fly',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true},
+    {id:'e5',name:'EZ bar bicep curls',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'15',w:true}
+  ]),
+  single({id:'e6',name:'Plate loaded machine lat pulldown',equip:'Machine',muscle:'back',sets:4,reps:'10',w:true}),
+  single({id:'e7',name:'Dumbbell incline curls',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true}),
+  superset('sup7',4,[
+    {id:'e8',name:'Standing machine shrug',equip:'Machine',muscle:'back',sets:4,reps:'20',w:true},
+    {id:'e9',name:'Reverse wrist curl',equip:'Free Weights',muscle:'back',sets:4,reps:'20',w:true}
+  ]),
+  single({id:'e10',name:'Dumbbell Hammer Curl/Hold',equip:'Free Weights',muscle:'back',sets:3,reps:'15',w:true})
+]},
+{id:'s13', title:'Wings Day (Back and Biceps)', accent:'back', items:[
+  single({id:'e1',name:'Lat pulldown',equip:'Machine',muscle:'back',sets:5,reps:'8-15',w:true}),
+  superset('sup2',4,[
+    {id:'e2',name:'Seated cable row',equip:'Cable',muscle:'back',sets:4,reps:'15',w:true},
+    {id:'e3',name:'Dumbbell concentration curl',equip:'Free Weights',muscle:'back',sets:4,reps:'12',w:true}
+  ]),
+  single({id:'e4',name:'Bent Over Landmine Row',equip:'Barbell/Rack',muscle:'back',sets:4,reps:'8-15',w:true}),
+  single({id:'e5',name:'Cable rope hammer curls',equip:'Cable',muscle:'back',sets:4,reps:'15',w:true}),
+  single({id:'e6',name:'Plate loaded machine row',equip:'Machine',muscle:'back',sets:4,reps:'8-12',w:true}),
+  single({id:'e7',name:'Dumbbell curl/hold',equip:'Other',muscle:'back',sets:3,reps:'60 sec',w:false,timed:true,target:60,unit:'sec'}),
+  single({id:'e8',name:'Dumbbell shrugs',equip:'Free Weights',muscle:'back',sets:4,reps:'25',w:true}),
+  single({id:'e9',name:'Wrist Curl',equip:'Free Weights',muscle:'back',sets:4,reps:'25',w:true})
+]},
+{id:'s14', title:'Bulletproof Core', accent:'core', items:[
+  single({id:'e1',name:'Plank (elbows)',equip:'Other',muscle:'core',sets:3,reps:'60 sec',w:false,timed:true,target:60,unit:'sec'}),
+  single({id:'e2',name:'Side plank dips (bench)',equip:'Other',muscle:'core',sets:4,reps:'15',w:false}),
+  single({id:'e3',name:'Cable crunches',equip:'Cable',muscle:'core',sets:4,reps:'15',w:true}),
+  single({id:'e4',name:'Cable Woodchop',equip:'Cable',muscle:'core',sets:4,reps:'12',w:true}),
+  single({id:'e5',name:'Crunches w/ feet up',equip:'Other',muscle:'core',sets:4,reps:'30',w:false})
+]},
+{id:'s15', title:'Leg Annihilation', accent:'legs', items:[
+  single({id:'e1',name:'Barbell pause back squat (2-3 sec)',equip:'Barbell/Rack',muscle:'legs',sets:5,reps:'10-15',w:true}),
+  single({id:'e2',name:'Barbell hip thrusts',equip:'Barbell/Rack',muscle:'legs',sets:4,reps:'15',w:true}),
+  single({id:'e3',name:'Leg press (quad focused)',equip:'Machine',muscle:'legs',sets:4,reps:'8-12',w:true}),
+  single({id:'e4',name:'Dumbbell walking lunges',equip:'Free Weights',muscle:'legs',sets:4,reps:'16',w:true}),
+  single({id:'e5',name:'Seated calf raise',equip:'Free Weights',muscle:'legs',sets:4,reps:'30',w:true}),
+  single({id:'e6',name:'Seated Leg Curl',equip:'Other',muscle:'legs',sets:4,reps:'10-15',w:false}),
+  single({id:'e7',name:'Wall sit',equip:'Other',muscle:'legs',sets:3,reps:'60 sec',w:false,timed:true,target:60,unit:'sec'})
+]},
+{id:'s16', title:'Legs for Days', accent:'legs', items:[
+  single({id:'e1',name:'Barbell back squat',equip:'Barbell/Rack',muscle:'legs',sets:5,reps:'8-15',w:true}),
+  single({id:'e2',name:'Forward lunge to reverse lunge',equip:'Free Weights',muscle:'legs',sets:4,reps:'10',w:true}),
+  single({id:'e3',name:'Stiff legged deadlift',equip:'Barbell/Rack',muscle:'legs',sets:4,reps:'10-15',w:true}),
+  single({id:'e4',name:'Elevated hip thrusts (banded)',equip:'Barbell/Rack',muscle:'legs',sets:4,reps:'30',w:true}),
+  single({id:'e5',name:'Standing calf raise',equip:'Free Weights',muscle:'legs',sets:5,reps:'30',w:true}),
+  single({id:'e6',name:'Wall sit',equip:'Other',muscle:'legs',sets:3,reps:'60 sec',w:false,timed:true,target:60,unit:'sec'})
+]},
+{id:'s17', title:'Legs Posterior Peach Focus', accent:'legs', items:[
+  single({id:'e1',name:'Deadlift',equip:'Barbell/Rack',muscle:'legs',sets:5,reps:'6-12',w:true}),
+  superset('sup2',4,[
+    {id:'e2',name:'Dumbbell reverse lunge',equip:'Free Weights',muscle:'legs',sets:4,reps:'20',w:true},
+    {id:'e3',name:'Jumping lunges',equip:'Other',muscle:'legs',sets:4,reps:'30',w:false}
+  ]),
+  single({id:'e4',name:'Seated calf raise',equip:'Free Weights',muscle:'legs',sets:4,reps:'20',w:true}),
+  single({id:'e5',name:'Glute Kickback Machine',equip:'Machine',muscle:'legs',sets:4,reps:'10-12',w:true})
+]},
+{id:'s18', title:'Booty - Thick Thighs save Lives', accent:'legs', items:[
+  single({id:'e1',name:'Bulgarian split squat',equip:'Free Weights',muscle:'legs',sets:5,reps:'8-15',w:true}),
+  single({id:'e2',name:'Dumbbell sumo squat',equip:'Free Weights',muscle:'legs',sets:4,reps:'15',w:true}),
+  single({id:'e3',name:'Glute bridge (banded)',equip:'Other',muscle:'legs',sets:4,reps:'30',w:false}),
+  single({id:'e4',name:'Single Leg Deadlift',equip:'Free Weights',muscle:'legs',sets:4,reps:'8-12',w:true}),
+  superset('sup5',3,[
+    {id:'e5',name:'Abductor machine',equip:'Machine',muscle:'legs',sets:3,reps:'15',w:true},
+    {id:'e6',name:'Adductor machine',equip:'Machine',muscle:'legs',sets:3,reps:'15',w:true}
+  ]),
+  single({id:'e7',name:'Seated calf raise',equip:'Free Weights',muscle:'legs',sets:4,reps:'30',w:true})
+]}
   ]
 };
 

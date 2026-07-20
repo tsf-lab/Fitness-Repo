@@ -8,7 +8,7 @@
 :root{
   --bg:#121316; --surface:#1B1D22; --surface-hi:#25282F; --line:#31343C;
   --text:#EDEBE4; --text-dim:#9A9CA6; --text-faint:#6B6E77;
-  --p1:#A56CC1; --p2:#3E8FD0; --p3:#4C9A6B; --p4:#E4572E; --down:#D9694F; --up:#5CB37A;
+  --p1:#A56CC1; --p2:#3E8FD0; --p3:#4C9A6B; --p4:#E4572E; --p5:#5AA9C4; --down:#D9694F; --up:#5CB37A;
   --legs:#E4572E; --chest:#3E8FD0; --back:#4C9A6B; --shoulders:#D4A24C; --arms:#A56CC1; --core:#C4485C; --cardio:#7A7D87;
 }
 *{box-sizing:border-box;}
@@ -99,12 +99,13 @@ input{font-family:'Inter',system-ui,sans-serif;}
 
 <script>
 /* ---------- config ---------- */
-var PROGRAMS = [ {name:'Bulk', phases:['p1','p2','p3']}, {name:'Shred', phases:['p4']} ];
+var PROGRAMS = [ {name:'Bulk', phases:['p1','p2','p3']}, {name:'Shred', phases:['p4']}, {name:'SB', phases:['p5']} ];
 var PLAN_META = {
   p1:{title:'PHASE 1', accent:'p1', focus:'Legs · Chest & Triceps · Back & Abs · Shoulders & Biceps · Full Upper'},
   p2:{title:'PHASE 2', accent:'p2', focus:'Chest · Back · Shoulders · Legs · Full Body'},
   p3:{title:'PHASE 3', accent:'p3', focus:'Legs · Chest & Arms · Conditioning · Shoulders · Back'},
-  p4:{title:'PHASE 4', accent:'p4', focus:'Strength · Upper · Lower · Chest/Back/Abs · Shoulders/Arms/Abs'}
+  p4:{title:'PHASE 4', accent:'p4', focus:'Strength · Upper · Lower · Chest/Back/Abs · Shoulders/Arms/Abs'},
+  p5:{title:'LIBRARY', accent:'p5', focus:'18 standalone workouts — pick by focus in Ad hoc'}
 };
 
 var authMode = 'login';

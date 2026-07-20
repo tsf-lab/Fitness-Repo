@@ -59,8 +59,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <script src="adhoc-config.js"></script>
 <script>
 /* ---- Firebase-backed session (per-account cloud data) ---- */
-var PHASE = (location.search.match(/[?&]phase=(p[1-4])/)||[])[1] || 'p1';
-var PHASE_META = { p1:{title:'PHASE 1',label:'Bulk'}, p2:{title:'PHASE 2',label:'Bulk'}, p3:{title:'PHASE 3',label:'Bulk'}, p4:{title:'PHASE 4',label:'Shred'} };
+var PHASE = (location.search.match(/[?&]phase=(p[1-9])/)||[])[1] || 'p1';
+var PHASE_META = { p1:{title:'PHASE 1',label:'Bulk'}, p2:{title:'PHASE 2',label:'Bulk'}, p3:{title:'PHASE 3',label:'Bulk'}, p4:{title:'PHASE 4',label:'Shred'}, p5:{title:'LIBRARY',label:'SB'} };
 (function(){ var m=PHASE_META[PHASE]||{title:PHASE,label:''}; document.title=m.title+' Tracker'; var t=document.getElementById('planTitle'); if(t) t.textContent=m.title; var l=document.getElementById('planLabel'); if(l) l.textContent=m.label; })();
 var WT_ADHOC = /[?&]adhoc=/.test(location.search);
 var WT_ADHOC_FOCUS = (location.search.match(/[?&]adhoc=([a-z0-9_-]+)/)||[])[1] || '';
