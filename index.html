@@ -22,7 +22,7 @@ input{font-family:'Inter',system-ui,sans-serif;}
 .field{width:100%;background:var(--surface);border:0.5px solid var(--line);border-radius:10px;color:var(--text);font-size:15px;padding:12px 13px;outline:none;margin-bottom:10px;}
 .field:focus{border-color:var(--text-faint);}
 .primary{width:100%;background:var(--text);border:0;color:var(--bg);font-weight:600;font-size:15px;padding:13px;border-radius:10px;}
-.plancard{background:var(--surface);border:0.5px solid var(--line);border-radius:14px;padding:16px;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s,background .15s;}
+.plancard{background:var(--surface);border:0.5px solid var(--line);border-radius:14px;padding:16px;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;gap:10px;transition:border-color .15s,background .15s;}
 .plancard:hover{background:var(--surface-hi);border-color:var(--text-faint);}
 .fade{animation:fade .25s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -33,6 +33,7 @@ input{font-family:'Inter',system-ui,sans-serif;}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="phases.js"></script>
 </head>
 <body>
 
@@ -72,49 +73,8 @@ input{font-family:'Inter',system-ui,sans-serif;}
       <button id="logoutBtn" class="pill" style="display:inline-flex;align-items:center;gap:5px;"><i class="ti ti-logout" style="font-size:14px;"></i>Log out</button>
     </div>
 
-    <a href="phase1.html" style="text-decoration:none;color:inherit;">
-      <div class="plancard" style="border-left:3px solid var(--p1);">
-        <div>
-          <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Bulk</div>
-          <h2 style="font-size:26px;margin:2px 0 3px;line-height:1;">PHASE 1</h2>
-          <div style="font-size:12px;color:var(--text-dim);">5 days · Legs · Chest · Back · Shoulders · Full upper</div>
-        </div>
-        <i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);"></i>
-      </div>
-    </a>
-
-    <a href="phase2.html" style="text-decoration:none;color:inherit;">
-      <div class="plancard" style="border-left:3px solid var(--p2);">
-        <div>
-          <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Bulk</div>
-          <h2 style="font-size:26px;margin:2px 0 3px;line-height:1;">PHASE 2</h2>
-          <div style="font-size:12px;color:var(--text-dim);">5 days · Chest · Back · Shoulders · Legs · Full body</div>
-        </div>
-        <i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);"></i>
-      </div>
-    </a>
-
-    <a href="phase3.html" style="text-decoration:none;color:inherit;">
-      <div class="plancard" style="border-left:3px solid var(--p3);">
-        <div>
-          <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Bulk</div>
-          <h2 style="font-size:26px;margin:2px 0 3px;line-height:1;">PHASE 3</h2>
-          <div style="font-size:12px;color:var(--text-dim);">5 days · Legs · Chest &amp; Arms · Conditioning · Shoulders · Back</div>
-        </div>
-        <i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);"></i>
-      </div>
-    </a>
-
-    <a href="phase4.html" style="text-decoration:none;color:inherit;">
-      <div class="plancard" style="border-left:3px solid var(--p4);">
-        <div>
-          <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Shred</div>
-          <h2 style="font-size:26px;margin:2px 0 3px;line-height:1;">PHASE 4</h2>
-          <div style="font-size:12px;color:var(--text-dim);">5 days · Strength · Upper · Lower · Chest/Back/Abs · Shoulders/Arms/Abs</div>
-        </div>
-        <i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);"></i>
-      </div>
-    </a>
+    <div id="continueWrap"></div>
+    <div id="planList"></div>
 
     <div style="font-size:12px;color:var(--text-faint);margin-top:18px;border-top:0.5px solid var(--line);padding-top:13px;">
       Logged sets, weights and notes save to your account in the cloud and stay in sync across your devices.
@@ -126,17 +86,27 @@ input{font-family:'Inter',system-ui,sans-serif;}
 </div>
 
 <script>
+/* ---------- config ---------- */
+var PROGRAMS = [ {name:'Bulk', phases:['p1','p2','p3']}, {name:'Shred', phases:['p4']} ];
+var PLAN_META = {
+  p1:{title:'PHASE 1', accent:'p1', focus:'Legs · Chest & Triceps · Back & Abs · Shoulders & Biceps · Full Upper'},
+  p2:{title:'PHASE 2', accent:'p2', focus:'Chest · Back · Shoulders · Legs · Full Body'},
+  p3:{title:'PHASE 3', accent:'p3', focus:'Legs · Chest & Arms · Conditioning · Shoulders · Back'},
+  p4:{title:'PHASE 4', accent:'p4', focus:'Strength · Upper · Lower · Chest/Back/Abs · Shoulders/Arms/Abs'}
+};
+
 var authMode = 'login';
+var WT_ALL = {};
 function $(id){ return document.getElementById(id); }
 function show(el, on){ el.style.display = on ? '' : 'none'; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function unameFromEmail(email){ return (email||'').split('@')[0] || 'Me'; }
 
+/* ---------- auth ---------- */
 function setMsg(msg, ok){
-  var e=$('authErr');
-  e.style.color = ok ? 'var(--up)' : 'var(--down)';
+  var e=$('authErr'); e.style.color = ok ? 'var(--up)' : 'var(--down)';
   if(msg){ e.textContent=msg; e.style.display='block'; } else { e.style.display='none'; }
 }
-
 function friendly(err){
   var c = err && err.code ? err.code : '';
   if(c==='auth/invalid-email') return 'That email address looks invalid.';
@@ -148,70 +118,134 @@ function friendly(err){
   if(c==='auth/configuration-not-found') return 'Login is not enabled yet in Firebase (enable Email/Password sign-in).';
   return (err && err.message) ? err.message : 'Something went wrong. Please try again.';
 }
-
 function renderAuthMode(){
   setMsg('');
   if(authMode==='signup'){
-    $('authTitle').textContent = 'Create your account';
-    $('authSubmit').textContent = 'Sign up';
-    $('authToggle').textContent = 'Have an account? Log in';
-    $('passField').setAttribute('autocomplete','new-password');
-    show($('signupHint'), true);
+    $('authTitle').textContent='Create your account'; $('authSubmit').textContent='Sign up';
+    $('authToggle').textContent='Have an account? Log in'; $('passField').setAttribute('autocomplete','new-password'); show($('signupHint'), true);
   } else {
-    $('authTitle').textContent = 'Log in';
-    $('authSubmit').textContent = 'Log in';
-    $('authToggle').textContent = 'Need an account? Sign up';
-    $('passField').setAttribute('autocomplete','current-password');
-    show($('signupHint'), false);
+    $('authTitle').textContent='Log in'; $('authSubmit').textContent='Log in';
+    $('authToggle').textContent='Need an account? Sign up'; $('passField').setAttribute('autocomplete','current-password'); show($('signupHint'), false);
   }
 }
-
 function doAuth(){
-  var email = $('emailField').value.trim();
-  var pass = $('passField').value;
-  setMsg('');
+  var email=$('emailField').value.trim(); var pass=$('passField').value; setMsg('');
   if(!email || !pass){ setMsg('Enter your email and password.'); return; }
-  $('authSubmit').disabled = true;
-  var done = function(){ $('authSubmit').disabled = false; };
+  $('authSubmit').disabled=true; var done=function(){ $('authSubmit').disabled=false; };
   if(authMode==='signup'){
     wtAuth.createUserWithEmailAndPassword(email, pass)
       .then(function(cred){ return cred.user.updateProfile({ displayName: unameFromEmail(email) }); })
-      .then(function(){ done(); })
-      .catch(function(err){ done(); setMsg(friendly(err)); });
+      .then(function(){ done(); }).catch(function(err){ done(); setMsg(friendly(err)); });
   } else {
-    wtAuth.signInWithEmailAndPassword(email, pass)
-      .then(function(){ done(); })
-      .catch(function(err){ done(); setMsg(friendly(err)); });
+    wtAuth.signInWithEmailAndPassword(email, pass).then(function(){ done(); }).catch(function(err){ done(); setMsg(friendly(err)); });
   }
 }
-
 $('authSubmit').addEventListener('click', doAuth);
 $('emailField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
 $('passField').addEventListener('keydown', function(e){ if(e.key==='Enter') doAuth(); });
-
+$('authToggle').addEventListener('click', function(){ authMode=(authMode==='signup')?'login':'signup'; renderAuthMode(); });
 $('togglePass').addEventListener('click', function(){
-  var p = $('passField');
-  var showing = (p.type === 'text');
-  p.type = showing ? 'password' : 'text';
-  this.querySelector('i').className = showing ? 'ti ti-eye' : 'ti ti-eye-off';
-  this.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
-  p.focus();
+  var p=$('passField'); var showing=(p.type==='text'); p.type=showing?'password':'text';
+  this.querySelector('i').className = showing?'ti ti-eye':'ti ti-eye-off';
+  this.setAttribute('aria-label', showing?'Show password':'Hide password'); p.focus();
 });
-
-$('authToggle').addEventListener('click', function(){
-  authMode = (authMode==='signup') ? 'login' : 'signup';
-  renderAuthMode();
-});
-
 $('forgotBtn').addEventListener('click', function(){
-  var email = $('emailField').value.trim();
+  var email=$('emailField').value.trim();
   if(!email){ setMsg('Enter your email above first, then tap Forgot password.'); return; }
-  wtAuth.sendPasswordResetEmail(email)
-    .then(function(){ setMsg('Password reset email sent to '+email+'. Check your inbox.', true); })
+  wtAuth.sendPasswordResetEmail(email).then(function(){ setMsg('Password reset email sent to '+email+'. Check your inbox.', true); })
     .catch(function(err){ setMsg(friendly(err)); });
 });
-
 $('logoutBtn').addEventListener('click', function(){ wtAuth.signOut(); });
+
+/* ---------- status computation ---------- */
+function anyLogged(rec){
+  if(!rec || !rec.sets) return false;
+  for(var i=0;i<rec.sets.length;i++){ var e=rec.sets[i]||{}; if((e.reps!=null&&e.reps!==''&&e.reps>0)||(e.duration!=null&&e.duration!==''&&e.duration>0)) return true; }
+  return false;
+}
+function last7Set(){ var s={}; var now=new Date(); for(var i=0;i<7;i++){ var d=new Date(now); d.setDate(now.getDate()-i); s[d.toISOString().slice(0,10)]=1; } return s; }
+function relDate(d){
+  if(!d) return '';
+  var today=new Date(new Date().toISOString().slice(0,10)+'T00:00:00');
+  var days=Math.round((today - new Date(d+'T00:00:00'))/86400000);
+  if(days<=0) return 'today'; if(days===1) return 'yesterday'; if(days<7) return days+' days ago';
+  if(days<14) return 'last week'; return Math.floor(days/7)+' weeks ago';
+}
+function computePhaseStatus(pk){
+  var pdata = WT_ALL[pk];
+  var defs = (typeof PHASES!=='undefined' && PHASES[pk]) ? PHASES[pk] : [];
+  var trainedDates={}, sessLast={};
+  if(pdata && pdata.progress){
+    Object.keys(pdata.progress).forEach(function(sid){
+      var byDate=pdata.progress[sid]||{};
+      Object.keys(byDate).forEach(function(d){
+        var rec=byDate[d]; var any=false;
+        Object.keys(rec).forEach(function(ex){ if(ex.charAt(0)!=='_' && anyLogged(rec[ex])) any=true; });
+        if(any){ trainedDates[d]=1; if(!sessLast[sid] || d>sessLast[sid]) sessLast[sid]=d; }
+      });
+    });
+  }
+  var dates=Object.keys(trainedDates).sort();
+  var last=dates.length? dates[dates.length-1] : null;
+  var wk=last7Set(), thisWeek=0; dates.forEach(function(d){ if(wk[d]) thisWeek++; });
+  var next=null, nextD='9999-99-99';
+  defs.forEach(function(s){ var ld=sessLast[s.id]||''; if(ld<nextD){ nextD=ld; next=s; } });
+  return { last:last, thisWeek:thisWeek, next:next, hasData:dates.length>0 };
+}
+
+/* ---------- home render ---------- */
+function renderHome(){
+  // Continue hero: the phase trained most recently, and its next session
+  var activePk=null, activeLast='';
+  Object.keys(PLAN_META).forEach(function(pk){ var st=computePhaseStatus(pk); if(st.last && st.last>activeLast){ activeLast=st.last; activePk=pk; } });
+  var heroHtml='';
+  if(activePk){
+    var st=computePhaseStatus(activePk), meta=PLAN_META[activePk];
+    var nextSid = st.next ? st.next.id : '', nextTitle = st.next ? st.next.title : 'Open workout';
+    heroHtml =
+      '<a href="tracker.html?phase='+activePk+(nextSid?('&session='+nextSid):'')+'" style="text-decoration:none;color:inherit;">'+
+        '<div style="background:var(--surface-hi);border:0.5px solid var(--line);border-left:3px solid var(--'+meta.accent+');border-radius:14px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
+          '<div style="min-width:0;">'+
+            '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.12em;">Continue · '+meta.title+'</div>'+
+            '<div style="font-size:21px;font-weight:700;margin-top:2px;line-height:1.1;">'+esc(nextTitle)+'</div>'+
+            '<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Last trained '+relDate(st.last)+'</div>'+
+          '</div>'+
+          '<i class="ti ti-player-play-filled" style="font-size:26px;color:var(--'+meta.accent+');flex:0 0 auto;"></i>'+
+        '</div>'+
+      '</a>';
+  }
+  var sections='';
+  PROGRAMS.forEach(function(prog){
+    sections += '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.14em;margin:4px 0 9px;">'+prog.name+'</div>';
+    prog.phases.forEach(function(pk){
+      var meta=PLAN_META[pk], st=computePhaseStatus(pk);
+      var status = st.hasData
+        ? ('Last '+relDate(st.last)+' · '+st.thisWeek+' this week'+(st.next?(' · Next: '+esc(st.next.title)):''))
+        : 'Not started yet';
+      sections +=
+        '<a href="tracker.html?phase='+pk+'" style="text-decoration:none;color:inherit;">'+
+          '<div class="plancard" style="border-left:3px solid var(--'+meta.accent+');">'+
+            '<div style="flex:1;min-width:0;">'+
+              '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">'+prog.name+'</div>'+
+              '<h2 style="font-size:24px;margin:2px 0 3px;line-height:1;">'+meta.title+'</h2>'+
+              '<div style="font-size:11px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+meta.focus+'</div>'+
+              '<div style="font-size:11px;color:'+(st.hasData?'var(--text-dim)':'var(--text-faint)')+';margin-top:5px;">'+status+'</div>'+
+            '</div>'+
+            '<i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);flex:0 0 auto;"></i>'+
+          '</div>'+
+        '</a>';
+    });
+  });
+  $('continueWrap').innerHTML = heroHtml;
+  $('planList').innerHTML = sections;
+}
+
+function hubLoad(uid){
+  WT_ALL = {};
+  ['p1','p2','p3','p4'].forEach(function(pk){ try{ var r=localStorage.getItem('wtcache::'+uid+'::'+pk); if(r) WT_ALL[pk]=JSON.parse(r); }catch(e){} });
+  renderHome();
+  wtLoadAll(uid).then(function(all){ if(all) Object.keys(all).forEach(function(pk){ WT_ALL[pk]=all[pk]; }); renderHome(); }).catch(function(){});
+}
 
 wtAuth.onAuthStateChanged(function(user){
   show($('loading'), false);
@@ -219,6 +253,7 @@ wtAuth.onAuthStateChanged(function(user){
     $('homeUser').textContent = user.displayName || unameFromEmail(user.email);
     show($('authScreen'), false);
     show($('homeScreen'), true);
+    hubLoad(user.uid);
   } else {
     show($('homeScreen'), false);
     renderAuthMode();
