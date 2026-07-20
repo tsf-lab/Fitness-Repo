@@ -44,7 +44,7 @@ var FOCUS_CHIPS = [
 ];
 
 var FOCUS_WORKOUTS = {
-  full:      ['p2 | Full Body', 'p4 | Strength', 'p1 | Full Upper', 'p4 | Upper', 'p3 | Conditioning Work', 'p5 | DB Blaster (Full Body)'],
+  full:      ['p2 | Full Body', 'p4 | Strength', 'p1 | Full Upper', 'p4 | Upper', 'p3 | Conditioning Work'],
   onlydumbs: ['p5 | DB Push Day', 'p5 | DB Pull Day', 'p5 | DB Blaster (Full Body)'],
   chest:     ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs', 'p5 | DB Push Day', 'p5 | Chest Big Push', 'p5 | Chest Best Day', 'p5 | Chest All the Angles'],
   back:      ['p1 | Back & Abs', 'p2 | Back & Triceps', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p5 | DB Pull Day', 'p5 | Back & Biceps Blast', 'p5 | Back & Biceps Annihilation', 'p5 | Wings Day (Back and Biceps)'],
