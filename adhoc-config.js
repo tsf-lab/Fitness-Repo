@@ -46,7 +46,7 @@ var FOCUS_CHIPS = [
 ];
 
 var FOCUS_WORKOUTS = {
-  full:      ['p1 | Full Upper', 'p2 | Full Body', 'p4 | Strength'],
+  full:      ['p2 | Full Body', 'p4 | Strength', 'p3 | Conditioning Work'],
   onlydumbs: [],
   upper:     ['p1 | Full Upper', 'p4 | Upper'],
   chest:     ['p1 | Chest & Triceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Upper', 'p4 | Chest, Back & Abs'],
