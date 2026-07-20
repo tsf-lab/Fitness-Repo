@@ -1151,7 +1151,7 @@ function openAddExerciseForm(sessionId, pairedWith, removeKey){
         '<label style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px;"><input id="addTimed" type="checkbox">This is time-based (cardio, plank...)</label>'+
       '</div>'+
       '<div>'+
-        '<label style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px;"><input id="addWeight" type="checkbox">Track weight for this exercise</label>'+
+        '<label style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px;"><input id="addWeight" type="checkbox" checked>Track weight for this exercise</label>'+
       '</div>'+
       '<div>'+
         '<label style="font-size:11px;color:var(--text-faint);display:block;margin-bottom:4px;">Notes (optional)</label>'+
@@ -1170,10 +1170,12 @@ function openAddExerciseForm(sessionId, pairedWith, removeKey){
     const [m,name] = v.split('|||');
     document.getElementById('addName').value = name;
     document.getElementById('addMuscle').value = m;
+    document.getElementById('addWeight').checked = !(m==='cardio' || ['Floor','Other'].indexOf(guessEquipment(name))>=0);
   };
   document.getElementById('addTimed').onchange = (e)=>{
     document.getElementById('addRepsWrap').style.display = e.target.checked ? 'none' : 'block';
     document.getElementById('addDurationWrap').style.display = e.target.checked ? 'block' : 'none';
+    document.getElementById('addWeight').checked = !e.target.checked;
   };
 
   document.getElementById('addExSubmit').onclick = async ()=>{
