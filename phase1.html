@@ -196,6 +196,17 @@ let currentSession = SESSIONS[0].id;
 const todayStr = new Date().toISOString().slice(0,10);
 let selectedDate = todayStr;
 let weekOffset = 0;
+(function(){
+  try{
+    var m = location.search.match(/[?&]date=(\d{4}-\d{2}-\d{2})/);
+    if(m){
+      selectedDate = m[1];
+      var now=new Date(); var ts=new Date(now); ts.setHours(0,0,0,0); ts.setDate(now.getDate()-now.getDay());
+      var t=new Date(selectedDate+'T00:00:00'); var tsun=new Date(t); tsun.setDate(t.getDate()-t.getDay());
+      weekOffset = Math.round((tsun-ts)/604800000);
+    }
+  }catch(e){}
+})();
 
 function last7Days(){
   const days=[];
@@ -237,6 +248,7 @@ async function loadData(){
     if(all) Object.keys(all).forEach(function(pk){ WT_ALL[pk] = all[pk]; });
     wtApplyData(WT_ALL[PHASE]);
     WT_ALL[PHASE] = data;
+    if(selectedDate!==todayStr && sessionCompletionForDate(currentSession, selectedDate)===0){ var _b=null,_c=0; SESSIONS.forEach(function(s){ var cc=sessionCompletionForDate(s.id,selectedDate); if(cc>_c){ _c=cc; _b=s.id; } }); if(_b) currentSession=_b; }
     render();
     if(WT_UID && (!all || !all[PHASE])) wtSavePhase(WT_UID, PHASE, data);
   }catch(e){}
@@ -376,7 +388,7 @@ function crossPhaseOtherDone(dateStr){
     var pdata=WT_ALL[pk]; if(!pdata) return;
     var defs=PHASES[pk]||[];
     wtPhaseTrainedSessions(pdata,dateStr).forEach(function(sid){
-      for(var i=0;i<defs.length;i++){ if(defs[i].id===sid){ out.push({accent:defs[i].accent,title:defs[i].title}); break; } }
+      for(var i=0;i<defs.length;i++){ if(defs[i].id===sid){ out.push({accent:defs[i].accent,title:defs[i].title,phase:pk}); break; } }
     });
   });
   return out;
@@ -503,11 +515,16 @@ function renderWeekStrip(){
   strip.innerHTML = html;
   document.querySelectorAll('[data-pickday]').forEach(btn=>{
     btn.onclick = ()=>{
-      selectedDate = btn.dataset.pickday;
-      if(sessionCompletionForDate(currentSession, selectedDate) === 0){
+      var d = btn.dataset.pickday;
+      selectedDate = d;
+      if(sessionCompletionForDate(currentSession, d) === 0){
         var best=null, bestC=0;
-        SESSIONS.forEach(function(s){ var c=sessionCompletionForDate(s.id, selectedDate); if(c>bestC){ bestC=c; best=s.id; } });
-        if(best) currentSession = best;
+        SESSIONS.forEach(function(s){ var c=sessionCompletionForDate(s.id, d); if(c>bestC){ bestC=c; best=s.id; } });
+        if(best){ currentSession = best; }
+        else {
+          var others = crossPhaseOtherDone(d);
+          if(others.length && others[0].phase){ location.href = others[0].phase.replace('p','phase')+'.html?date='+d; return; }
+        }
       }
       render();
     };
