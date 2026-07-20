@@ -81,6 +81,16 @@ input{font-family:'Inter',system-ui,sans-serif;}
     </div>
   </div>
 
+  <!-- AD HOC (pick any workout by focus, across phases) -->
+  <div id="adhocScreen" style="display:none;" class="fade">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div><div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.14em;">Ad hoc</div><div style="font-size:16px;font-weight:600;">Pick a workout by focus</div></div>
+      <button id="adhocBack" class="pill" style="display:inline-flex;align-items:center;gap:5px;"><i class="ti ti-chevron-left" style="font-size:14px;"></i>Back</button>
+    </div>
+    <div id="focusGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+    <div id="focusSessions"></div>
+  </div>
+
   <div id="loading" style="font-size:13px;color:var(--text-faint);">Loading…</div>
 
 </div>
@@ -215,8 +225,16 @@ function renderHome(){
       '</a>';
   }
   var sections='';
+  sections += '<div class="plancard" id="adhocOpen" style="cursor:pointer;border-left:3px solid var(--text-dim);">'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">Ad hoc</div>'+
+        '<h2 style="font-size:24px;margin:2px 0 3px;line-height:1;">PICK A WORKOUT</h2>'+
+        '<div style="font-size:11px;color:var(--text-dim);">Any focus — Legs, Chest, Back… from every phase</div>'+
+      '</div><i class="ti ti-layout-grid" style="font-size:22px;color:var(--text-faint);flex:0 0 auto;"></i>'+
+    '</div>';
+  sections += '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.14em;margin:18px 0 9px;">Plans</div>';
   PROGRAMS.forEach(function(prog){
-    sections += '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.14em;margin:4px 0 9px;">'+prog.name+'</div>';
+    sections += '<div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin:6px 0 8px;font-weight:600;">'+prog.name+'</div>';
     prog.phases.forEach(function(pk){
       var meta=PLAN_META[pk], st=computePhaseStatus(pk);
       var status = st.hasData
@@ -238,7 +256,47 @@ function renderHome(){
   });
   $('continueWrap').innerHTML = heroHtml;
   $('planList').innerHTML = sections;
+  var ao=$('adhocOpen'); if(ao) ao.onclick=function(){ show($('homeScreen'),false); adhocFocus=null; show($('adhocScreen'),true); renderAdhoc(); };
 }
+
+/* ---------- ad hoc ---------- */
+var FOCUS_ORDER = ['legs','chest','back','shoulders','arms','core','cardio'];
+var FOCUS_LABEL = {legs:'Legs',chest:'Chest',back:'Back',shoulders:'Shoulders',arms:'Arms',core:'Core',cardio:'Conditioning'};
+var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); });
+var adhocFocus = null;
+function sessionsByFocus(){
+  var map={}; if(typeof PHASES==='undefined') return map;
+  Object.keys(PLAN_META).forEach(function(pk){
+    (PHASES[pk]||[]).forEach(function(s){ var f=s.accent; if(!map[f]) map[f]=[]; map[f].push({phase:pk, sid:s.id, title:s.title}); });
+  });
+  return map;
+}
+function renderAdhoc(){
+  var byF=sessionsByFocus(), grid='';
+  FOCUS_ORDER.forEach(function(f){
+    if(!byF[f]) return; var on=(adhocFocus===f);
+    grid += '<button data-focus="'+f+'" style="background:'+(on?'var(--'+f+')':'var(--surface)')+';border:0.5px solid '+(on?'var(--'+f+')':'var(--line)')+';color:'+(on?'#121316':'var(--text)')+';font-size:13px;font-weight:600;padding:8px 13px;border-radius:10px;cursor:pointer;">'+FOCUS_LABEL[f]+'</button>';
+  });
+  $('focusGrid').innerHTML=grid;
+  var sess='';
+  if(adhocFocus && byF[adhocFocus]){
+    byF[adhocFocus].forEach(function(o){
+      var meta=PLAN_META[o.phase];
+      sess += '<a href="tracker.html?phase='+o.phase+'&session='+o.sid+'" style="text-decoration:none;color:inherit;">'+
+        '<div class="plancard" style="border-left:3px solid var(--'+meta.accent+');">'+
+          '<div style="flex:1;min-width:0;">'+
+            '<div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">'+phaseToProgram[o.phase]+' · '+meta.title+'</div>'+
+            '<h2 style="font-size:20px;margin:2px 0 0;line-height:1;">'+esc(o.title)+'</h2>'+
+          '</div><i class="ti ti-chevron-right" style="font-size:22px;color:var(--text-faint);flex:0 0 auto;"></i>'+
+        '</div></a>';
+    });
+  } else {
+    sess='<div style="font-size:12px;color:var(--text-faint);">Choose a focus above to see every matching workout across all phases.</div>';
+  }
+  $('focusSessions').innerHTML=sess;
+  document.querySelectorAll('[data-focus]').forEach(function(b){ b.onclick=function(){ adhocFocus=b.getAttribute('data-focus'); renderAdhoc(); }; });
+}
+$('adhocBack').addEventListener('click', function(){ show($('adhocScreen'),false); show($('homeScreen'),true); });
 
 function hubLoad(uid){
   WT_ALL = {};
