@@ -105,7 +105,7 @@ var PLAN_META = {
   p2:{title:'PHASE 2', accent:'p2', focus:'Chest · Back · Shoulders · Legs · Full Body'},
   p3:{title:'PHASE 3', accent:'p3', focus:'Legs · Chest & Arms · Conditioning · Shoulders · Back'},
   p4:{title:'PHASE 4', accent:'p4', focus:'Strength · Upper · Lower · Chest/Back/Abs · Shoulders/Arms/Abs'},
-  p5:{title:'LIBRARY', accent:'p5', focus:'18 standalone workouts — pick by focus in Ad hoc'}
+  p5:{title:'AD HOC', accent:'p5', focus:'18 standalone workouts — pick by focus in Ad hoc'}
 };
 
 var authMode = 'login';
@@ -263,7 +263,7 @@ function renderHome(){
 }
 
 /* ---------- ad hoc ---------- */
-var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); }); phaseToProgram['p5']='SB';
+var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); }); phaseToProgram['p5']='Ad Hoc';
 var adhocFocus = null;
 var adhocExpanded = {};
 function exLine(ex, indent){
