@@ -35,6 +35,7 @@ input{font-family:'Inter',system-ui,sans-serif;}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="phases.js"></script>
+<script src="adhoc-config.js"></script>
 </head>
 <body>
 
@@ -261,8 +262,6 @@ function renderHome(){
 }
 
 /* ---------- ad hoc ---------- */
-var FOCUS_ORDER = ['legs','chest','back','shoulders','arms','core','cardio'];
-var FOCUS_LABEL = {legs:'Legs',chest:'Chest',back:'Back',shoulders:'Shoulders',arms:'Arms',core:'Core',cardio:'Conditioning'};
 var phaseToProgram = {}; PROGRAMS.forEach(function(p){ p.phases.forEach(function(pk){ phaseToProgram[pk]=p.name; }); });
 var adhocFocus = null;
 var adhocExpanded = {};
@@ -285,17 +284,25 @@ function sessionBreakdownHTML(session){
   return rows;
 }
 function sessionsByFocus(){
-  var map={}; if(typeof PHASES==='undefined') return map;
-  Object.keys(PLAN_META).forEach(function(pk){
-    (PHASES[pk]||[]).forEach(function(s){ var f=s.accent; if(!map[f]) map[f]=[]; map[f].push({phase:pk, sid:s.id, title:s.title}); });
+  var map={}; if(typeof PHASES==='undefined' || typeof FOCUS_WORKOUTS==='undefined') return map;
+  Object.keys(FOCUS_WORKOUTS).forEach(function(fk){
+    map[fk]=[];
+    (FOCUS_WORKOUTS[fk]||[]).forEach(function(spec){
+      var bar=spec.indexOf('|'); if(bar<0) return;
+      var pk=spec.substring(0,bar).replace(/\s+/g,'');
+      var title=spec.substring(bar+1).replace(/^\s+|\s+$/g,'');
+      var defs=PHASES[pk]||[];
+      for(var i=0;i<defs.length;i++){ if(defs[i].title===title){ map[fk].push({phase:pk, sid:defs[i].id, title:defs[i].title}); break; } }
+    });
   });
   return map;
 }
 function renderAdhoc(){
   var byF=sessionsByFocus(), grid='';
-  FOCUS_ORDER.forEach(function(f){
-    if(!byF[f]) return; var on=(adhocFocus===f);
-    grid += '<button data-focus="'+f+'" style="background:'+(on?'var(--'+f+')':'var(--surface)')+';border:0.5px solid '+(on?'var(--'+f+')':'var(--line)')+';color:'+(on?'#121316':'var(--text)')+';font-size:13px;font-weight:600;padding:8px 13px;border-radius:10px;cursor:pointer;">'+FOCUS_LABEL[f]+'</button>';
+  var chips=(typeof FOCUS_CHIPS!=='undefined')?FOCUS_CHIPS:[];
+  chips.forEach(function(c){
+    var f=c.key; if(!byF[f] || !byF[f].length) return; var on=(adhocFocus===f);
+    grid += '<button data-focus="'+f+'" style="background:'+(on?'var(--'+f+', var(--text-dim))':'var(--surface)')+';border:0.5px solid '+(on?'var(--'+f+', var(--text-dim))':'var(--line)')+';color:'+(on?'#121316':'var(--text)')+';font-size:13px;font-weight:600;padding:8px 13px;border-radius:10px;cursor:pointer;">'+esc(c.label)+'</button>';
   });
   $('focusGrid').innerHTML=grid;
   var sess='';
@@ -315,7 +322,7 @@ function renderAdhoc(){
         '</button>'+
         (open && sessionObj ? '<div style="padding:0 16px 14px;">'+
             '<div style="border-top:0.5px solid var(--line);padding-top:10px;">'+sessionBreakdownHTML(sessionObj)+'</div>'+
-            '<a href="tracker.html?phase='+o.phase+'&session='+o.sid+'&adhoc=1" style="display:block;text-align:center;margin-top:12px;background:var(--'+meta.accent+');color:#121316;font-weight:600;font-size:14px;padding:10px;border-radius:10px;text-decoration:none;">Start this workout</a>'+
+            '<a href="tracker.html?phase='+o.phase+'&session='+o.sid+'&adhoc='+adhocFocus+'" style="display:block;text-align:center;margin-top:12px;background:var(--'+meta.accent+');color:#121316;font-weight:600;font-size:14px;padding:10px;border-radius:10px;text-decoration:none;">Start this workout</a>'+
           '</div>' : '')+
       '</div>';
     });
