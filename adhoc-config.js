@@ -41,7 +41,6 @@ var FOCUS_CHIPS = [
   { key:'shoulders', label:'Shoulders' },
   { key:'arms',      label:'Biceps' },
   { key:'legs',      label:'Legs' },
-  { key:'lower',     label:'Lower' },
   { key:'core',      label:'Core' }
 ];
 
@@ -54,6 +53,5 @@ var FOCUS_WORKOUTS = {
   shoulders: ['p1 | Shoulders & Biceps', 'p2 | Shoulders & Abs', 'p3 | Shoulders & Squats', 'p4 | Shoulders, Arms & Abs'],
   arms:      ['p1 | Shoulders & Biceps', 'p2 | Chest & Biceps', 'p3 | Chest & Arms', 'p4 | Shoulders, Arms & Abs', 'p4 | Strength'],
   legs:      ['p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)', 'p4 | Lower'],
-  lower:     ['p4 | Lower', 'p1 | Legs', 'p2 | Legs', 'p3 | Legs (High Volume)'],
   core:      ['p1 | Back & Abs', 'p2 | Shoulders & Abs', 'p3 | Back & Abs', 'p4 | Chest, Back & Abs', 'p4 | Shoulders, Arms & Abs']
 };
