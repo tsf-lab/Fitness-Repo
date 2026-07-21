@@ -138,7 +138,9 @@ function getCustomList(sessionId){
 
 let data = {progress:{}, swaps:{}, removed:{}, customExercises:{}, calorieUnit:'kcal', weightUnit:'lbs', extraWorkouts:{}};
 let currentSession = SESSIONS[0].id;
-(function(){ var sm=location.search.match(/[?&]session=(s\d+)/); if(sm && SESSIONS.some(function(s){return s.id===sm[1];})) currentSession=sm[1]; })();
+let userTouchedSession = false;
+let WT_SESSION_FIXED = false;
+(function(){ var sm=location.search.match(/[?&]session=(s\d+)/); if(sm && SESSIONS.some(function(s){return s.id===sm[1];})){ currentSession=sm[1]; WT_SESSION_FIXED=true; } })();
 const todayStr = new Date().toISOString().slice(0,10);
 let selectedDate = todayStr;
 let weekOffset = 0;
@@ -177,6 +179,22 @@ function wtApplyData(obj){
   if(!data.weightUnit) data.weightUnit = 'lbs';
   if(!data.extraWorkouts) data.extraWorkouts = {};
 }
+// Pick the workout to open on: the next one in plan order given this week's progress.
+function suggestedSessionForToday(){
+  if(!SESSIONS.length) return currentSession;
+  // Resume a session already started (but not finished) today.
+  for(var i=0;i<SESSIONS.length;i++){ var c=sessionCompletionForDate(SESSIONS[i].id, todayStr); if(c>0 && c<0.999) return SESSIONS[i].id; }
+  // Otherwise suggest the first workout in plan order not yet trained this week.
+  var wk=last7Days();
+  function trainedThisWeek(sid){ for(var j=0;j<wk.length;j++){ if(sessionCompletionForDate(sid, wk[j])>0) return true; } return false; }
+  for(var k=0;k<SESSIONS.length;k++){ if(!trainedThisWeek(SESSIONS[k].id)) return SESSIONS[k].id; }
+  return SESSIONS[0].id;
+}
+function applyDefaultSession(){
+  if(WT_ADHOC || WT_SESSION_FIXED || userTouchedSession) return;
+  if(selectedDate!==todayStr || weekOffset!==0) return;
+  currentSession = suggestedSessionForToday();
+}
 async function loadData(){
   // Instant paint from local cache (or older local-profile data) so the plan always shows.
   var cached = null;
@@ -187,6 +205,7 @@ async function loadData(){
   ['p1','p2','p3','p4'].forEach(function(pk){ try{ var r=localStorage.getItem('wtcache::'+WT_UID+'::'+pk); if(r) WT_ALL[pk]=JSON.parse(r); }catch(e){} });
   wtApplyData(cached);
   WT_ALL[PHASE] = data;
+  applyDefaultSession();
   render();
   requestAnimationFrame(focusFirstUnstarted);
   // Then sync from the cloud; merge cloud phases over the local caches.
@@ -195,6 +214,7 @@ async function loadData(){
     if(all) Object.keys(all).forEach(function(pk){ WT_ALL[pk] = all[pk]; });
     wtApplyData(WT_ALL[PHASE]);
     WT_ALL[PHASE] = data;
+    applyDefaultSession();
     if(selectedDate!==todayStr && sessionCompletionForDate(currentSession, selectedDate)===0){ var _b=null,_c=0; SESSIONS.forEach(function(s){ var cc=sessionCompletionForDate(s.id,selectedDate); if(cc>_c){ _c=cc; _b=s.id; } }); if(_b) currentSession=_b; }
     render();
     if(WT_UID && (!all || !all[PHASE])) wtSavePhase(WT_UID, PHASE, data);
@@ -577,6 +597,7 @@ function renderDayTabs(){
   document.querySelectorAll('#dayTabs button[data-session]').forEach(btn=>{
     btn.onclick = (e)=>{
       if(e.target.dataset.delworkout) return;
+      userTouchedSession = true;
       currentSession = btn.dataset.session; render(); focusFirstUnstarted();
     };
   });
