@@ -250,7 +250,7 @@ function findInProgress(){
         Object.keys(rec).forEach(function(ex){ if(ex.charAt(0)!=='_'&&anyLogged(rec[ex])) started=true; });
         if(!started) return;
         var c=sessionCompletionAt(defs, pdata, sid, date);
-        if(c.total<=0) return;
+        if(c.total<=0 || c.done<=0) return;
         var frac=c.done/c.total;
         if(frac>=0.999) return;
         if(!best || date>best.date || (date===best.date && frac>best.frac)){
