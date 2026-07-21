@@ -206,6 +206,7 @@ async function loadData(){
   ['p1','p2','p3','p4'].forEach(function(pk){ try{ var r=localStorage.getItem('wtcache::'+WT_UID+'::'+pk); if(r) WT_ALL[pk]=JSON.parse(r); }catch(e){} });
   wtApplyData(cached);
   WT_ALL[PHASE] = data;
+  cleanupPhantomCalories();
   applyDefaultSession();
   render();
   requestAnimationFrame(focusFirstUnstarted);
@@ -215,6 +216,7 @@ async function loadData(){
     if(all) Object.keys(all).forEach(function(pk){ WT_ALL[pk] = all[pk]; });
     wtApplyData(WT_ALL[PHASE]);
     WT_ALL[PHASE] = data;
+    cleanupPhantomCalories();
     applyDefaultSession();
     if(selectedDate!==todayStr && sessionCompletionForDate(currentSession, selectedDate)===0){ var _b=null,_c=0; SESSIONS.forEach(function(s){ var cc=sessionCompletionForDate(s.id,selectedDate); if(cc>_c){ _c=cc; _b=s.id; } }); if(_b) currentSession=_b; }
     render();
@@ -405,10 +407,25 @@ function weeklyCaloriesTotal(){
   days.forEach(d=>{
     allSessionsForDate(d).forEach(s=>{
       const rec = data.progress[s.id] && data.progress[s.id][d];
-      if(rec && rec._calories!=null && rec._calories!==''){ total += Number(rec._calories); }
+      if(rec && rec._calories!=null && rec._calories!=='' && sessionCompletionForDate(s.id, d)>0){ total += Number(rec._calories); }
     });
   });
   return total;
+}
+// Remove calories that were auto-carried onto days where the workout wasn't actually trained.
+function cleanupPhantomCalories(){
+  var changed=false, prog=data.progress||{};
+  Object.keys(prog).forEach(function(sid){
+    if(!getSessionObj(sid)) return;
+    var byDate=prog[sid]||{};
+    Object.keys(byDate).forEach(function(d){
+      var rec=byDate[d];
+      if(rec && rec._calories!=null && rec._calories!=='' && sessionCompletionForDate(sid, d)===0){
+        rec._calories=null; changed=true;
+      }
+    });
+  });
+  if(changed) saveData();
 }
 
 function renderWeekRing(){
@@ -686,16 +703,9 @@ function caloriesBadge(dateRec){
   return '<span style="font-size:11px;color:'+(up?'var(--up)':'var(--down)')+';display:inline-flex;align-items:center;gap:2px;"><i class="ti ti-arrow-'+(up?'up':'down')+'" style="font-size:12px;"></i>'+(up?'+':'')+diff+' '+unit+' vs '+prev.calories+' last time</span>';
 }
 
-const caloriesCarriedKeys = new Set();
 function renderCalories(){
   const dateRec = getDateRecord(currentSession, selectedDate);
   if(!dateRec._calorieUnit) dateRec._calorieUnit = data.calorieUnit || 'kcal';
-  const carryKey = currentSession+'-'+selectedDate;
-  if(selectedDate===todayStr && !caloriesCarriedKeys.has(carryKey) && (dateRec._calories==null || dateRec._calories==='')){
-    const prev = prevCaloriesFor(currentSession);
-    if(prev){ dateRec._calories = prev.calories; saveData(); }
-  }
-  caloriesCarriedKeys.add(carryKey);
   const unit = dateRec._calorieUnit;
   document.getElementById('caloriesRow').innerHTML =
     '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">Calories burned</div>'+
