@@ -882,22 +882,29 @@ function leafCardHTML(sessionId, ex, bg){
   const wStep = wUnit==='kg'?'1':'2.5';
   const mwNum = (rec.maxWeight!=null && rec.maxWeight!=='') ? Number(rec.maxWeight) : null;
   const roundToStep = v => { const st = wUnit==='kg'?1:2.5; return Math.round(v/st)*st; };
-  const workingHint = mwNum!=null
-    ? (roundToStep(mwNum*0.6)+'-'+roundToStep(mwNum*0.8)+' '+wUnit+', 60-80% of max unless otherwise specified')
-    : '60-80% of max weight unless otherwise specified';
   const effEquip = rec.equipment || ex.equip || guessEquipment(displayName);
   const isBarbell = /barbell/i.test(effEquip) || /^bb[\s-]/i.test(displayName);
   const barW = (rec.barWeight!=null && rec.barWeight!=='') ? Number(rec.barWeight) : null;
   const wNum = (rec.weight!=null && rec.weight!=='') ? Number(rec.weight) : null;
-  const totalBits = [];
-  if(wNum!=null) totalBits.push('working '+(wNum+(barW||0))+' '+wUnit);
-  if(mwNum!=null) totalBits.push('max '+(mwNum+(barW||0))+' '+wUnit);
+  let workingHint;
+  if(mwNum==null){
+    workingHint = '60-80% of max weight unless otherwise specified';
+  } else if(isBarbell && barW!=null){
+    const plLo = Math.max(0, roundToStep(mwNum*0.6 - barW));
+    const plHi = Math.max(0, roundToStep(mwNum*0.8 - barW));
+    workingHint = plLo+'-'+plHi+' '+wUnit+' in plates (60-80% of max, plus '+barW+' '+wUnit+' bar)';
+  } else if(isBarbell){
+    workingHint = roundToStep(mwNum*0.6)+'-'+roundToStep(mwNum*0.8)+' '+wUnit+' total (60-80% of max; enter bar weight for plate target)';
+  } else {
+    workingHint = roundToStep(mwNum*0.6)+'-'+roundToStep(mwNum*0.8)+' '+wUnit+', 60-80% of max unless otherwise specified';
+  }
+  const workingTotal = (wNum!=null) ? (wNum + (barW||0)) : null;
   const barSection = (ex.w && isBarbell) ?
-    '<div style="font-size:10px;color:var(--text-faint);letter-spacing:0.05em;margin:10px 0 4px;"><span style="text-transform:uppercase;">Bar weight</span> <span style="text-transform:none;">(optional &mdash; added to total)</span></div>'+
+    '<div style="font-size:10px;color:var(--text-faint);letter-spacing:0.05em;margin:10px 0 4px;"><span style="text-transform:uppercase;">Bar weight</span> <span style="text-transform:none;">(optional &mdash; plates entered above are the working weight)</span></div>'+
     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
       '<input type="number" inputmode="decimal" step="'+wStep+'" data-barweight="'+ex.id+'" value="'+(rec.barWeight!=null?rec.barWeight:'')+'" placeholder="'+(wUnit==='kg'?'20':'45')+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
       '<span style="font-size:10px;color:var(--text-faint);">'+wUnit+'</span>'+
-      (barW!=null && totalBits.length ? '<span style="font-size:11px;color:var(--text-dim);">Total w/ bar: '+totalBits.join(' &middot; ')+'</span>' : '')+
+      (barW!=null && workingTotal!=null ? '<span style="font-size:11px;color:var(--text-dim);">Total lifted: '+workingTotal+' '+wUnit+' (plates + bar)</span>' : '')+
     '</div>' : '';
   const weightRow = ex.w ?
     '<div style="margin-top:10px;">'+
