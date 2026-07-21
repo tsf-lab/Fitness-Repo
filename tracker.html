@@ -1002,6 +1002,10 @@ function renderExercises(){
         const prev = prevWeightFor(s.id, ex.id);
         if(prev){ rec.weight = prev.weight; carriedAny = true; }
       }
+      if(ex.w && (rec.maxWeight==null || rec.maxWeight==='')){
+        const bestMax = bestMaxWeightFor(s.id, ex.id);
+        if(bestMax){ rec.maxWeight = bestMax.weight; carriedAny = true; }
+      }
       if(ex.cardio){
         if(rec.incline==null || rec.incline===''){
           const prevInc = prevExFieldFor(s.id, ex.id, 'incline');
