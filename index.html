@@ -205,23 +205,77 @@ function computePhaseStatus(pk){
   defs.forEach(function(s){ var ld=sessLast[s.id]||''; if(ld<nextD){ nextD=ld; next=s; } });
   return { last:last, thisWeek:thisWeek, next:next, hasData:dates.length>0 };
 }
+function sessionLeavesHub(s){
+  var leaves=[];
+  s.items.forEach(function(it){
+    if(it.type==='single') leaves.push(it.ex);
+    else if(it.subs) it.subs.forEach(function(x){ leaves.push(x); });
+  });
+  return leaves;
+}
+function sessionCompletionAt(defs, pdata, sid, date){
+  var session=null;
+  for(var i=0;i<defs.length;i++){ if(defs[i].id===sid){ session=defs[i]; break; } }
+  if(!session) return {total:0, done:0, title:''};
+  var prog = (pdata.progress[sid] && pdata.progress[sid][date]) || {};
+  var total=0, done=0;
+  sessionLeavesHub(session).forEach(function(ex){
+    if(pdata.removed && pdata.removed[sid+'-'+ex.id]) return;
+    var rec = prog[ex.id];
+    var removedIdx = (rec && rec.removedSetIdx) || [];
+    for(var i=0;i<ex.sets;i++){ if(removedIdx.indexOf(i)<0) total++; }
+    if(rec && rec.sets){
+      var n=Math.min(rec.sets.length, ex.sets);
+      for(var j=0;j<n;j++){
+        if(removedIdx.indexOf(j)>=0) continue;
+        var e=rec.sets[j]||{};
+        if(ex.timed){ if(e.duration!=null&&e.duration!==''&&e.duration>0) done++; }
+        else { if(e.reps!=null&&e.reps!==''&&e.reps>0) done++; }
+      }
+    }
+  });
+  return {total:total, done:done, title:session.title};
+}
+// Most recent workout that was started but is not 100% complete (across plans, excluding Ad hoc/p5)
+function findInProgress(){
+  var best=null;
+  Object.keys(PLAN_META).forEach(function(pk){
+    if(pk==='p5') return;
+    var pdata=WT_ALL[pk]; if(!pdata||!pdata.progress) return;
+    var defs=(typeof PHASES!=='undefined'&&PHASES[pk])?PHASES[pk]:[];
+    Object.keys(pdata.progress).forEach(function(sid){
+      var byDate=pdata.progress[sid]||{};
+      Object.keys(byDate).forEach(function(date){
+        var rec=byDate[date]||{}, started=false;
+        Object.keys(rec).forEach(function(ex){ if(ex.charAt(0)!=='_'&&anyLogged(rec[ex])) started=true; });
+        if(!started) return;
+        var c=sessionCompletionAt(defs, pdata, sid, date);
+        if(c.total<=0) return;
+        var frac=c.done/c.total;
+        if(frac>=0.999) return;
+        if(!best || date>best.date || (date===best.date && frac>best.frac)){
+          best={pk:pk, sid:sid, date:date, frac:frac, title:c.title};
+        }
+      });
+    });
+  });
+  return best;
+}
 
 /* ---------- home render ---------- */
 function renderHome(){
-  // Continue hero: the phase trained most recently, and its next session
-  var activePk=null, activeLast='';
-  Object.keys(PLAN_META).forEach(function(pk){ if(pk==='p5') return; var st=computePhaseStatus(pk); if(st.last && st.last>activeLast){ activeLast=st.last; activePk=pk; } });
+  // Continue hero: the most recently trained workout that was started but not finished (100%)
+  var ip=findInProgress();
   var heroHtml='';
-  if(activePk){
-    var st=computePhaseStatus(activePk), meta=PLAN_META[activePk];
-    var nextSid = st.next ? st.next.id : '', nextTitle = st.next ? st.next.title : 'Open workout';
+  if(ip){
+    var meta=PLAN_META[ip.pk], pct=Math.round(ip.frac*100);
     heroHtml =
-      '<a href="tracker.html?phase='+activePk+(nextSid?('&session='+nextSid):'')+'" style="text-decoration:none;color:inherit;">'+
+      '<a href="tracker.html?phase='+ip.pk+'&session='+ip.sid+'&date='+ip.date+'" style="text-decoration:none;color:inherit;">'+
         '<div style="background:var(--surface-hi);border:0.5px solid var(--line);border-left:3px solid var(--'+meta.accent+');border-radius:14px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
           '<div style="min-width:0;">'+
             '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.12em;">Continue · '+meta.title+'</div>'+
-            '<div style="font-size:21px;font-weight:700;margin-top:2px;line-height:1.1;">'+esc(nextTitle)+'</div>'+
-            '<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Last trained '+relDate(st.last)+'</div>'+
+            '<div style="font-size:21px;font-weight:700;margin-top:2px;line-height:1.1;">'+esc(ip.title)+'</div>'+
+            '<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Started '+relDate(ip.date)+' · '+pct+'% done</div>'+
           '</div>'+
           '<i class="ti ti-player-play-filled" style="font-size:26px;color:var(--'+meta.accent+');flex:0 0 auto;"></i>'+
         '</div>'+
