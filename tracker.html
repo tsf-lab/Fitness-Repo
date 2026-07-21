@@ -858,6 +858,20 @@ function leafCardHTML(sessionId, ex, bg){
   const workingHint = mwNum!=null
     ? (roundToStep(mwNum*0.6)+'-'+roundToStep(mwNum*0.8)+' '+wUnit+', 60-80% of max unless otherwise specified')
     : '60-80% of max weight unless otherwise specified';
+  const effEquip = rec.equipment || ex.equip || guessEquipment(displayName);
+  const isBarbell = /barbell/i.test(effEquip) || /^bb[\s-]/i.test(displayName);
+  const barW = (rec.barWeight!=null && rec.barWeight!=='') ? Number(rec.barWeight) : null;
+  const wNum = (rec.weight!=null && rec.weight!=='') ? Number(rec.weight) : null;
+  const totalBits = [];
+  if(wNum!=null) totalBits.push('working '+(wNum+(barW||0))+' '+wUnit);
+  if(mwNum!=null) totalBits.push('max '+(mwNum+(barW||0))+' '+wUnit);
+  const barSection = (ex.w && isBarbell) ?
+    '<div style="font-size:10px;color:var(--text-faint);letter-spacing:0.05em;margin:10px 0 4px;"><span style="text-transform:uppercase;">Bar weight</span> <span style="text-transform:none;">(optional &mdash; added to total)</span></div>'+
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+      '<input type="number" inputmode="decimal" step="'+wStep+'" data-barweight="'+ex.id+'" value="'+(rec.barWeight!=null?rec.barWeight:'')+'" placeholder="'+(wUnit==='kg'?'20':'45')+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
+      '<span style="font-size:10px;color:var(--text-faint);">'+wUnit+'</span>'+
+      (barW!=null && totalBits.length ? '<span style="font-size:11px;color:var(--text-dim);">Total w/ bar: '+totalBits.join(' &middot; ')+'</span>' : '')+
+    '</div>' : '';
   const weightRow = ex.w ?
     '<div style="margin-top:10px;">'+
       '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Max weight (top set)</div>'+
@@ -874,6 +888,7 @@ function leafCardHTML(sessionId, ex, bg){
         '</div>'+
         weightBadge(sessionId, ex)+
       '</div>'+
+      barSection+
     '</div>' : '';
 
 
@@ -1011,6 +1026,10 @@ function renderExercises(){
       if(ex.w && (rec.maxWeight==null || rec.maxWeight==='')){
         const bestMax = bestMaxWeightFor(s.id, ex.id);
         if(bestMax){ rec.maxWeight = bestMax.weight; carriedAny = true; }
+      }
+      if(ex.w && (rec.barWeight==null || rec.barWeight==='')){
+        const prevBar = prevExFieldFor(s.id, ex.id, 'barWeight');
+        if(prevBar){ rec.barWeight = prevBar.value; carriedAny = true; }
       }
       if(ex.cardio){
         if(rec.incline==null || rec.incline===''){
@@ -1163,6 +1182,16 @@ function renderExercises(){
       const rec = getDateRecord(currentSession, selectedDate)[exId];
       const val = inp.value==='' ? null : parseFloat(inp.value);
       rec.maxWeight = val;
+      await saveData();
+      render();
+    };
+  });
+  document.querySelectorAll('[data-barweight]').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const exId = inp.dataset.barweight;
+      const rec = getDateRecord(currentSession, selectedDate)[exId];
+      const val = inp.value==='' ? null : parseFloat(inp.value);
+      rec.barWeight = val;
       await saveData();
       render();
     };
