@@ -236,9 +236,11 @@ function sessionCompletionAt(defs, pdata, sid, date){
   });
   return {total:total, done:done, title:session.title};
 }
-// Most recent workout that was started but is not 100% complete (across plans, excluding Ad hoc/p5)
+// Continue only reflects the MOST RECENT training day. If that day's workout is
+// incomplete (>0%, <100%) offer to resume it; if it's finished — or the newest
+// activity is a completed/started newer workout — show nothing. (Excludes Ad hoc/p5.)
 function findInProgress(){
-  var best=null;
+  var latest='', cands=[];
   Object.keys(PLAN_META).forEach(function(pk){
     if(pk==='p5') return;
     var pdata=WT_ALL[pk]; if(!pdata||!pdata.progress) return;
@@ -246,18 +248,18 @@ function findInProgress(){
     Object.keys(pdata.progress).forEach(function(sid){
       var byDate=pdata.progress[sid]||{};
       Object.keys(byDate).forEach(function(date){
-        var rec=byDate[date]||{}, started=false;
-        Object.keys(rec).forEach(function(ex){ if(ex.charAt(0)!=='_'&&anyLogged(rec[ex])) started=true; });
-        if(!started) return;
         var c=sessionCompletionAt(defs, pdata, sid, date);
         if(c.total<=0 || c.done<=0) return;
-        var frac=c.done/c.total;
-        if(frac>=0.999) return;
-        if(!best || date>best.date || (date===best.date && frac>best.frac)){
-          best={pk:pk, sid:sid, date:date, frac:frac, title:c.title};
-        }
+        if(date>latest) latest=date;
+        cands.push({pk:pk, sid:sid, date:date, frac:c.done/c.total, title:c.title});
       });
     });
+  });
+  if(!latest) return null;
+  var best=null;
+  cands.forEach(function(x){
+    if(x.date!==latest || x.frac>=0.999) return;
+    if(!best || x.frac>best.frac) best=x;
   });
   return best;
 }
