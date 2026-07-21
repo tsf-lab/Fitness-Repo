@@ -725,8 +725,9 @@ function leafCardHTML(sessionId, ex, bg){
   const rec = getExRecord(sessionId, selectedDate, ex);
   if(!rec.removedSetIdx) rec.removedSetIdx = [];
   const isFullyComplete = targetSetCount(rec, ex) > 0 && completionCount(rec, ex) >= targetSetCount(rec, ex);
+  const missingWeight = ex.w && (rec.weight==null || rec.weight==='');
   const cardKey = sessionId+'-'+ex.id+'-'+selectedDate;
-  if(isFullyComplete && !expandedOverrides.has(cardKey) && selectedDate===todayStr){
+  if(isFullyComplete && !missingWeight && !expandedOverrides.has(cardKey) && selectedDate===todayStr){
     return '<div style="background:'+bg+';border-radius:12px;padding:10px 12px;border-left:3px solid '+color+';display:flex;align-items:center;gap:8px;opacity:0.75;">'+
       '<i class="ti ti-check" style="font-size:15px;color:var(--up);flex:0 0 auto;"></i>'+
       '<span style="display:inline-block;font-size:9px;padding:2px 6px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;flex:0 0 auto;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
