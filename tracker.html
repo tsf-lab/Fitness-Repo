@@ -1031,6 +1031,16 @@ function renderExercises(){
         const prevBar = prevExFieldFor(s.id, ex.id, 'barWeight');
         if(prevBar){ rec.barWeight = prevBar.value; carriedAny = true; }
       }
+      // Once a weighted exercise is completed, capture its working+bar total as the max if it's a new high.
+      if(ex.w && rec.weight!=null && rec.weight!==''){
+        const exDone = targetSetCount(rec, ex) > 0 && completionCount(rec, ex) >= targetSetCount(rec, ex);
+        if(exDone){
+          const total = Number(rec.weight) + ((rec.barWeight!=null && rec.barWeight!=='') ? Number(rec.barWeight) : 0);
+          if(rec.maxWeight==null || rec.maxWeight==='' || total > Number(rec.maxWeight)){
+            rec.maxWeight = total; carriedAny = true;
+          }
+        }
+      }
       if(ex.cardio){
         if(rec.incline==null || rec.incline===''){
           const prevInc = prevExFieldFor(s.id, ex.id, 'incline');
