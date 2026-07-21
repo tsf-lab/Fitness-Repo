@@ -895,10 +895,11 @@ function leafCardHTML(sessionId, ex, bg){
         (ex.note? '<div style="font-size:11px;color:var(--text-faint);font-style:italic;margin-top:3px;">'+ex.note+'</div>' : '')+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:6px;flex:0 0 auto;align-items:flex-end;">'+
-        '<div style="display:flex;gap:6px;">'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">'+
           '<button data-swap="'+sessionId+'-'+ex.id+'" data-muscle="'+ex.muscle+'" data-orig="'+ex.name+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-repeat" style="font-size:13px;"></i>Swap</button>'+
           '<button data-skipex="'+sessionId+'-'+ex.id+'" title="Skip / remove this exercise" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-player-skip-forward" style="font-size:13px;"></i>Skip</button>'+
           '<button data-forcecomplete="'+ex.id+'" style="background:'+(isFullyComplete?'var(--up)':'transparent')+';border:0.5px solid '+(isFullyComplete?'var(--up)':'var(--line)')+';color:'+(isFullyComplete?'#121316':'var(--text-dim)')+';font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;font-weight:'+(isFullyComplete?'600':'400')+';"><i class="ti ti-check" style="font-size:13px;"></i>'+(isFullyComplete?'Completed':'Complete')+'</button>'+
+          '<button data-clearex="'+ex.id+'" title="Clear entries for this exercise" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-eraser" style="font-size:13px;"></i>Clear</button>'+
           (isFullyComplete? '<button data-collapsecard="'+cardKey+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chevron-up" style="font-size:13px;"></i>Minimize</button>' : '')+
         '</div>'+
         '<div style="display:flex;gap:6px;">'+
@@ -1257,6 +1258,20 @@ function renderExercises(){
           if(ex.timed){ if(entry.duration==null || entry.duration==='') entry.duration = targetVal; }
           else { if(entry.reps==null || entry.reps==='') entry.reps = targetVal; }
         });
+      }
+      await saveData();
+      render();
+    };
+  });
+  document.querySelectorAll('[data-clearex]').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const exId = btn.dataset.clearex;
+      const s = getSessionObj(currentSession);
+      const ex = sessionLeaves(s).find(e=>e.id===exId);
+      if(!ex) return;
+      const rec = getDateRecord(currentSession, selectedDate)[exId];
+      if(rec && Array.isArray(rec.sets)){
+        rec.sets = rec.sets.slice(0, ex.sets).map(()=> blankSetEntry(ex));
       }
       await saveData();
       render();
