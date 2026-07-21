@@ -137,7 +137,7 @@ function getCustomList(sessionId){
   return data.customExercises[sessionId];
 }
 
-let data = {progress:{}, swaps:{}, removed:{}, customExercises:{}, calorieUnit:'kcal', weightUnit:'lbs', extraWorkouts:{}};
+let data = {progress:{}, swaps:{}, removed:{}, customExercises:{}, calorieUnit:'kcal', weightUnit:'lbs', extraWorkouts:{}, exerciseOrder:{}};
 let currentSession = SESSIONS[0].id;
 let userTouchedSession = false;
 let WT_SESSION_FIXED = false;
@@ -179,6 +179,7 @@ function wtApplyData(obj){
   if(!data.calorieUnit) data.calorieUnit = 'kcal';
   if(!data.weightUnit) data.weightUnit = 'lbs';
   if(!data.extraWorkouts) data.extraWorkouts = {};
+  if(!data.exerciseOrder) data.exerciseOrder = {};
 }
 // Pick the workout to open on: the next one in plan order given this week's progress.
 function suggestedSessionForToday(){
@@ -764,7 +765,7 @@ function leafCardHTML(sessionId, ex, bg){
   if(isFullyComplete && !missingWeight && !expandedOverrides.has(cardKey) && selectedDate===todayStr){
     return '<div style="background:'+bg+';border-radius:12px;padding:10px 12px;border-left:3px solid '+color+';display:flex;align-items:center;gap:8px;opacity:0.75;">'+
       '<i class="ti ti-check" style="font-size:15px;color:var(--up);flex:0 0 auto;"></i>'+
-      '<span style="display:inline-block;font-size:9px;padding:2px 6px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;flex:0 0 auto;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
+      '<span data-reorder="'+sessionId+'" title="Reorder exercises" style="cursor:pointer;display:inline-flex;align-items:center;gap:2px;font-size:9px;padding:2px 6px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;flex:0 0 auto;">'+MUSCLE_LABELS[ex.muscle]+'<i class="ti ti-arrows-sort" style="font-size:10px;"></i></span>'+
       '<div class="exname" style="font-size:15px;line-height:1;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+displayName.toUpperCase()+'</div>'+
       '<button data-expandcard="'+cardKey+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:4px 8px;border-radius:7px;flex:0 0 auto;">Expand</button>'+
     '</div>';
@@ -835,7 +836,7 @@ function leafCardHTML(sessionId, ex, bg){
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'+
       '<div>'+
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">'+
-          '<span style="display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
+          '<span data-reorder="'+sessionId+'" title="Reorder exercises" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">'+MUSCLE_LABELS[ex.muscle]+'<i class="ti ti-arrows-sort" style="font-size:11px;"></i></span>'+
           (()=>{
             const guessed = rec.equipment || ex.equip || guessEquipment(displayName);
             const isGuess = !rec.equipment;
@@ -864,6 +865,86 @@ function leafCardHTML(sessionId, ex, bg){
     '<textarea data-note="'+ex.id+'" rows="1" placeholder="Add a note (form cues, how it felt, equipment used...)" style="width:100%;background:var(--bg);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:12px;padding:6px 8px;margin-top:8px;resize:vertical;min-height:30px;font-family:\'Inter\',system-ui,sans-serif;">'+(rec.userNote||'')+'</textarea>'+
     '<button data-addpair="'+sessionId+'|||'+ex.id+'" style="background:none;border:none;color:var(--text-faint);font-size:11px;padding:6px 0 0;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:12px;"></i>Add superset / active recovery exercise</button>'+
   '</div>';
+}
+
+// Apply a saved custom order to a list of {key,...} blocks; unknown/new blocks keep natural order at the end.
+function orderBlocks(sid, blocks){
+  const ord = (data.exerciseOrder && data.exerciseOrder[sid]) || null;
+  if(!ord || !ord.length) return blocks;
+  const byKey = {}; blocks.forEach(b=> byKey[b.key]=b);
+  const used = {}; const out=[];
+  ord.forEach(k=>{ if(byKey[k] && !used[k]){ out.push(byKey[k]); used[k]=1; } });
+  blocks.forEach(b=>{ if(!used[b.key]) out.push(b); });
+  return out;
+}
+// The reorderable blocks of a session (singles, supersets, standalone customs) with display labels, in current order.
+function sessionBlockList(sid){
+  const s = getSessionObj(sid); if(!s) return [];
+  const customList = getCustomList(sid).filter(ex=> !data.removed[sid+'-'+ex.id]);
+  const pairedMap = {}; const standaloneCustoms=[];
+  customList.forEach(ex=>{ if(ex.pairedWith){ (pairedMap[ex.pairedWith]=pairedMap[ex.pairedWith]||[]).push(ex);} else standaloneCustoms.push(ex); });
+  const nameOf = ex => (data.swaps[sid+'-'+ex.id]||ex.name);
+  const blocks=[];
+  s.items.forEach((item, ii)=>{
+    if(item.type==='single'){
+      if(data.removed[sid+'-'+item.ex.id]) return;
+      const pairs = pairedMap[item.ex.id]||[];
+      blocks.push({key:'i:'+item.ex.id, label: pairs.length? (nameOf(item.ex)+' + '+pairs.map(nameOf).join(' + ')) : nameOf(item.ex)});
+    } else {
+      const visibleSubs = item.subs.filter(sub=> !data.removed[sid+'-'+sub.id]);
+      if(!visibleSubs.length) return;
+      const allSubs=[]; visibleSubs.forEach(sub=>{ allSubs.push(sub); (pairedMap[sub.id]||[]).forEach(p=>allSubs.push(p)); });
+      blocks.push({key:'g:'+(item.id||('idx'+ii)), label:'Superset: '+allSubs.map(nameOf).join(' + ')});
+    }
+  });
+  standaloneCustoms.forEach(ex=>{
+    const pairs=pairedMap[ex.id]||[];
+    blocks.push({key:'c:'+ex.id, label: pairs.length? (nameOf(ex)+' + '+pairs.map(nameOf).join(' + ')) : nameOf(ex)});
+  });
+  return orderBlocks(sid, blocks);
+}
+function openReorder(sid){
+  const existing=document.getElementById('reorderOverlay'); if(existing) existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='reorderOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+  const title = (getSessionObj(sid)||{}).title || '';
+  function draw(){
+    const list = sessionBlockList(sid);
+    overlay.innerHTML = '<div style="max-width:460px;width:100%;max-height:85vh;overflow:auto;background:var(--surface);border-radius:14px;padding:14px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
+        '<div style="font-size:15px;font-weight:700;">Reorder exercises</div>'+
+        '<button id="reorderDone" style="background:var(--surface-hi);border:0.5px solid var(--line);color:var(--text);font-size:12px;padding:6px 14px;border-radius:8px;font-weight:600;">Done</button>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--text-faint);margin-bottom:12px;">'+wtEsc(title.toUpperCase())+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:6px;">'+
+        list.map((b,i)=>
+          '<div style="display:flex;align-items:center;gap:8px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:10px;padding:8px 10px;">'+
+            '<span style="width:18px;flex:0 0 auto;font-size:12px;color:var(--text-faint);">'+(i+1)+'</span>'+
+            '<span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+wtEsc(b.label)+'</span>'+
+            '<button data-mv="up" data-key="'+wtEsc(b.key)+'" '+(i===0?'disabled':'')+' style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);width:32px;height:32px;border-radius:8px;flex:0 0 auto;'+(i===0?'opacity:0.3;':'')+'"><i class="ti ti-chevron-up" style="font-size:15px;"></i></button>'+
+            '<button data-mv="down" data-key="'+wtEsc(b.key)+'" '+(i===list.length-1?'disabled':'')+' style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);width:32px;height:32px;border-radius:8px;flex:0 0 auto;'+(i===list.length-1?'opacity:0.3;':'')+'"><i class="ti ti-chevron-down" style="font-size:15px;"></i></button>'+
+          '</div>'
+        ).join('')+
+      '</div>';
+    document.getElementById('reorderDone').onclick=()=>{ overlay.remove(); render(); };
+    overlay.querySelectorAll('[data-mv]').forEach(btn=>{
+      btn.onclick=async ()=>{
+        const keys = sessionBlockList(sid).map(x=>x.key);
+        const idx = keys.indexOf(btn.dataset.key);
+        const j = idx + (btn.dataset.mv==='up'? -1 : 1);
+        if(idx<0 || j<0 || j>=keys.length) return;
+        const tmp=keys[idx]; keys[idx]=keys[j]; keys[j]=tmp;
+        if(!data.exerciseOrder) data.exerciseOrder={};
+        data.exerciseOrder[sid]=keys;
+        await saveData();
+        draw();
+      };
+    });
+  }
+  draw();
+  document.body.appendChild(overlay);
+  overlay.onclick=(e)=>{ if(e.target===overlay){ overlay.remove(); render(); } };
 }
 
 function renderExercises(){
@@ -916,16 +997,13 @@ function renderExercises(){
     '</div>';
   }
 
-  let html='';
-  s.items.forEach(item=>{
+  const blocks=[];
+  s.items.forEach((item, ii)=>{
     if(item.type==='single'){
       if(data.removed[s.id+'-'+item.ex.id]) return;
       const pairs = pairedMap[item.ex.id]||[];
-      if(pairs.length===0){
-        html += leafCardHTML(s.id, item.ex, 'var(--surface)');
-      } else {
-        html += supersetWrapperHTML([item.ex, ...pairs], item.ex.sets);
-      }
+      const h = pairs.length===0 ? leafCardHTML(s.id, item.ex, 'var(--surface)') : supersetWrapperHTML([item.ex, ...pairs], item.ex.sets);
+      blocks.push({key:'i:'+item.ex.id, html:h});
     } else {
       const visibleSubs = item.subs.filter(sub=> !data.removed[s.id+'-'+sub.id]);
       if(visibleSubs.length===0) return;
@@ -935,7 +1013,7 @@ function renderExercises(){
       const dots = muscles.map(m=>'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--'+m+');"></span>').join('');
       let subHtml='';
       allSubs.forEach(sub=>{ subHtml += leafCardHTML(s.id, sub, 'var(--surface-hi)'); });
-      html += '<div style="background:var(--surface);border-radius:12px;padding:10px;border:1px dashed var(--line);">'+
+      const h = '<div style="background:var(--surface);border-radius:12px;padding:10px;border:1px dashed var(--line);">'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:0 2px;">'+
           '<i class="ti ti-repeat" style="font-size:13px;color:var(--text-dim);"></i>'+
           '<span style="font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-dim);text-transform:uppercase;">Superset &middot; '+item.rounds+' rounds</span>'+
@@ -943,17 +1021,16 @@ function renderExercises(){
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:8px;">'+subHtml+'</div>'+
       '</div>';
+      blocks.push({key:'g:'+(item.id||('idx'+ii)), html:h});
     }
   });
-
   standaloneCustoms.forEach(ex=>{
     const pairs = pairedMap[ex.id]||[];
-    if(pairs.length===0){
-      html += leafCardHTML(s.id, ex, 'var(--surface)');
-    } else {
-      html += supersetWrapperHTML([ex, ...pairs], ex.sets);
-    }
+    const h = pairs.length===0 ? leafCardHTML(s.id, ex, 'var(--surface)') : supersetWrapperHTML([ex, ...pairs], ex.sets);
+    blocks.push({key:'c:'+ex.id, html:h});
   });
+
+  let html = orderBlocks(s.id, blocks).map(b=>b.html).join('');
 
   html += '<button id="addExerciseBtn" style="background:transparent;border:1.5px dashed var(--line);color:var(--text-dim);font-size:13px;padding:12px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-plus" style="font-size:15px;"></i>Add exercise</button>';
 
@@ -1135,6 +1212,9 @@ function renderExercises(){
   });
   document.querySelectorAll('[data-swap]').forEach(btn=>{
     btn.onclick = ()=> openSwapMenu(btn.dataset.swap, btn.dataset.muscle, btn.dataset.orig);
+  });
+  document.querySelectorAll('[data-reorder]').forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); openReorder(el.dataset.reorder); };
   });
   document.querySelectorAll('[data-photo]').forEach(btn=>{
     btn.onclick = ()=> openPhoto(btn.dataset.photo);
