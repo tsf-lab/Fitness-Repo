@@ -853,6 +853,11 @@ function leafCardHTML(sessionId, ex, bg){
 
   const wUnit = data.weightUnit || 'lbs';
   const wStep = wUnit==='kg'?'1':'2.5';
+  const mwNum = (rec.maxWeight!=null && rec.maxWeight!=='') ? Number(rec.maxWeight) : null;
+  const roundToStep = v => { const st = wUnit==='kg'?1:2.5; return Math.round(v/st)*st; };
+  const workingHint = mwNum!=null
+    ? (roundToStep(mwNum*0.6)+'-'+roundToStep(mwNum*0.8)+' '+wUnit+', 60-80% of max unless otherwise specified')
+    : '60-80% of max weight unless otherwise specified';
   const weightRow = ex.w ?
     '<div style="margin-top:10px;">'+
       '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Max weight (top set)</div>'+
@@ -860,7 +865,7 @@ function leafCardHTML(sessionId, ex, bg){
         '<input type="number" inputmode="decimal" step="'+wStep+'" data-maxweight="'+ex.id+'" value="'+(rec.maxWeight!=null?rec.maxWeight:'')+'" placeholder="'+wUnit+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
         maxWeightBadge(sessionId, ex)+
       '</div>'+
-      '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Working weight</div>'+
+      '<div style="font-size:10px;color:var(--text-faint);letter-spacing:0.05em;margin-bottom:4px;"><span style="text-transform:uppercase;">Working weight</span> <span style="text-transform:none;">('+workingHint+')</span></div>'+
       '<div style="display:flex;align-items:center;gap:8px;">'+
         '<input type="number" inputmode="decimal" step="'+wStep+'" data-weight="'+ex.id+'" value="'+(rec.weight!=null?rec.weight:'')+'" placeholder="'+wUnit+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
         '<div style="display:flex;border:0.5px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto;">'+
