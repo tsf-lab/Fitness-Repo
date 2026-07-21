@@ -266,6 +266,18 @@ function prevWeightFor(sessionId, exId){
   }
   return null;
 }
+// Best (highest) max weight ever logged for this exercise, before the selected date.
+function bestMaxWeightFor(sessionId, exId){
+  const map = data.progress[sessionId] || {};
+  let best=null;
+  Object.keys(map).filter(d=> d < selectedDate).forEach(d=>{
+    const rec = map[d][exId];
+    if(rec && rec.maxWeight!=null && rec.maxWeight!=='' && (best===null || Number(rec.maxWeight)>best.weight)){
+      best = {weight:Number(rec.maxWeight), date:d};
+    }
+  });
+  return best;
+}
 
 function prevCaloriesFor(sessionId){
   const map = data.progress[sessionId] || {};
@@ -751,6 +763,25 @@ function weightBadge(sessionId, ex){
   const up = diff>0;
   return '<span style="font-size:11px;color:'+(up?'var(--up)':'var(--down)')+';display:inline-flex;align-items:center;gap:2px;"><i class="ti ti-arrow-'+(up?'up':'down')+'" style="font-size:12px;"></i>'+(up?'+':'')+diff+' '+u+' vs '+prev.weight+' '+u+' last time</span>';
 }
+function maxWeightBadge(sessionId, ex){
+  const best = bestMaxWeightFor(sessionId, ex.id);
+  const rec = getExRecord(sessionId, selectedDate, ex);
+  const u = data.weightUnit || 'lbs';
+  if(rec.maxWeight==null || rec.maxWeight===''){
+    return best ? '<span style="font-size:11px;color:var(--text-faint);">best: '+best.weight+' '+u+'</span>' : '<span style="font-size:11px;color:var(--text-faint);">no max yet</span>';
+  }
+  if(!best){
+    return '<span style="font-size:11px;color:var(--up);display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-trophy" style="font-size:12px;"></i>first max</span>';
+  }
+  const diff = Number(rec.maxWeight) - best.weight;
+  if(diff>0){
+    return '<span style="font-size:11px;color:var(--up);display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-trophy" style="font-size:12px;"></i>new PR &middot; +'+diff+' '+u+' vs '+best.weight+'</span>';
+  }
+  if(diff===0){
+    return '<span style="font-size:11px;color:var(--text-faint);">ties best ('+best.weight+' '+u+')</span>';
+  }
+  return '<span style="font-size:11px;color:var(--text-faint);">best: '+best.weight+' '+u+'</span>';
+}
 
 const expandedOverrides = new Set();
 
@@ -821,14 +852,23 @@ function leafCardHTML(sessionId, ex, bg){
   }
 
   const wUnit = data.weightUnit || 'lbs';
+  const wStep = wUnit==='kg'?'1':'2.5';
   const weightRow = ex.w ?
-    '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;">'+
-      '<input type="number" inputmode="decimal" step="'+(wUnit==='kg'?'1':'2.5')+'" data-weight="'+ex.id+'" value="'+(rec.weight!=null?rec.weight:'')+'" placeholder="'+wUnit+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
-      '<div style="display:flex;border:0.5px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto;">'+
-        '<button data-wunit="lbs" style="background:'+(wUnit==='lbs'?'var(--surface-hi)':'transparent')+';color:'+(wUnit==='lbs'?'var(--text)':'var(--text-faint)')+';border:none;font-size:11px;padding:6px 9px;">lbs</button>'+
-        '<button data-wunit="kg" style="background:'+(wUnit==='kg'?'var(--surface-hi)':'transparent')+';color:'+(wUnit==='kg'?'var(--text)':'var(--text-faint)')+';border:none;font-size:11px;padding:6px 9px;">kg</button>'+
+    '<div style="margin-top:10px;">'+
+      '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Max weight (top set)</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'+
+        '<input type="number" inputmode="decimal" step="'+wStep+'" data-maxweight="'+ex.id+'" value="'+(rec.maxWeight!=null?rec.maxWeight:'')+'" placeholder="'+wUnit+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
+        maxWeightBadge(sessionId, ex)+
       '</div>'+
-      weightBadge(sessionId, ex)+
+      '<div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Working weight</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;">'+
+        '<input type="number" inputmode="decimal" step="'+wStep+'" data-weight="'+ex.id+'" value="'+(rec.weight!=null?rec.weight:'')+'" placeholder="'+wUnit+'" style="width:64px;height:32px;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:0 8px;">'+
+        '<div style="display:flex;border:0.5px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto;">'+
+          '<button data-wunit="lbs" style="background:'+(wUnit==='lbs'?'var(--surface-hi)':'transparent')+';color:'+(wUnit==='lbs'?'var(--text)':'var(--text-faint)')+';border:none;font-size:11px;padding:6px 9px;">lbs</button>'+
+          '<button data-wunit="kg" style="background:'+(wUnit==='kg'?'var(--surface-hi)':'transparent')+';color:'+(wUnit==='kg'?'var(--text)':'var(--text-faint)')+';border:none;font-size:11px;padding:6px 9px;">kg</button>'+
+        '</div>'+
+        weightBadge(sessionId, ex)+
+      '</div>'+
     '</div>' : '';
 
 
@@ -1103,6 +1143,16 @@ function renderExercises(){
       const rec = getDateRecord(currentSession, selectedDate)[exId];
       const val = inp.value==='' ? null : parseFloat(inp.value);
       rec.weight = val;
+      await saveData();
+      render();
+    };
+  });
+  document.querySelectorAll('[data-maxweight]').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const exId = inp.dataset.maxweight;
+      const rec = getDateRecord(currentSession, selectedDate)[exId];
+      const val = inp.value==='' ? null : parseFloat(inp.value);
+      rec.maxWeight = val;
       await saveData();
       render();
     };
