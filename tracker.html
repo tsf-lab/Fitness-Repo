@@ -852,7 +852,7 @@ function leafCardHTML(sessionId, ex, bg){
       '<div style="display:flex;flex-direction:column;gap:6px;flex:0 0 auto;align-items:flex-end;">'+
         '<div style="display:flex;gap:6px;">'+
           '<button data-swap="'+sessionId+'-'+ex.id+'" data-muscle="'+ex.muscle+'" data-orig="'+ex.name+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-repeat" style="font-size:13px;"></i>Swap</button>'+
-          '<button data-remove-ex="'+sessionId+'-'+ex.id+'" title="Skip / remove this exercise" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-player-skip-forward" style="font-size:13px;"></i>Skip</button>'+
+          '<button data-skipex="'+sessionId+'-'+ex.id+'" title="Skip / remove this exercise" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-player-skip-forward" style="font-size:13px;"></i>Skip</button>'+
           '<button data-forcecomplete="'+ex.id+'" style="background:'+(isFullyComplete?'var(--up)':'transparent')+';border:0.5px solid '+(isFullyComplete?'var(--up)':'var(--line)')+';color:'+(isFullyComplete?'#121316':'var(--text-dim)')+';font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;font-weight:'+(isFullyComplete?'600':'400')+';"><i class="ti ti-check" style="font-size:13px;"></i>'+(isFullyComplete?'Completed':'Complete')+'</button>'+
           (isFullyComplete? '<button data-collapsecard="'+cardKey+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chevron-up" style="font-size:13px;"></i>Minimize</button>' : '')+
         '</div>'+
@@ -1220,6 +1220,9 @@ function renderExercises(){
   });
   document.querySelectorAll('[data-reorder]').forEach(el=>{
     el.onclick = (e)=>{ e.stopPropagation(); openReorder(el.dataset.reorder); };
+  });
+  document.querySelectorAll('[data-skipex]').forEach(b=>{
+    b.onclick = async ()=>{ data.removed[b.dataset.skipex] = true; await saveData(); render(); };
   });
   document.querySelectorAll('[data-photo]').forEach(btn=>{
     btn.onclick = ()=> openPhoto(btn.dataset.photo);
