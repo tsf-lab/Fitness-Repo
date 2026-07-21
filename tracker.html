@@ -1478,7 +1478,11 @@ document.addEventListener('focusin', (e)=>{
       if(rec){ rec.weight = prev.weight; saveData(); }
     }
   }
-  t.select();
+});
+// Single click/tap just fills & completes the set; double-click selects all to edit
+document.addEventListener('dblclick', (e)=>{
+  const t = e.target;
+  if(t.tagName==='INPUT' && t.type==='number') t.select();
 });
 
 wtAuth.onAuthStateChanged(function(user){
