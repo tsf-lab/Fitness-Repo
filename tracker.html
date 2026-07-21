@@ -208,6 +208,7 @@ async function loadData(){
   wtApplyData(cached);
   WT_ALL[PHASE] = data;
   cleanupPhantomCalories();
+  backfillMaxWeights();
   applyDefaultSession();
   render();
   requestAnimationFrame(focusFirstUnstarted);
@@ -218,6 +219,7 @@ async function loadData(){
     wtApplyData(WT_ALL[PHASE]);
     WT_ALL[PHASE] = data;
     cleanupPhantomCalories();
+    backfillMaxWeights();
     applyDefaultSession();
     if(selectedDate!==todayStr && sessionCompletionForDate(currentSession, selectedDate)===0){ var _b=null,_c=0; SESSIONS.forEach(function(s){ var cc=sessionCompletionForDate(s.id,selectedDate); if(cc>_c){ _c=cc; _b=s.id; } }); if(_b) currentSession=_b; }
     render();
@@ -436,6 +438,31 @@ function cleanupPhantomCalories(){
       if(rec && rec._calories!=null && rec._calories!=='' && sessionCompletionForDate(sid, d)===0){
         rec._calories=null; changed=true;
       }
+    });
+  });
+  if(changed) saveData();
+}
+// Backfill: for every completed weighted exercise in history, set its max weight to the working+bar total if higher.
+function backfillMaxWeights(){
+  var changed=false, prog=data.progress||{};
+  Object.keys(prog).forEach(function(sid){
+    var so=getSessionObj(sid); if(!so) return;
+    var leaves=sessionLeaves(so);
+    var byDate=prog[sid]||{};
+    Object.keys(byDate).forEach(function(d){
+      var dayRec=byDate[d];
+      leaves.forEach(function(ex){
+        if(!ex.w) return;
+        var rec=dayRec[ex.id];
+        if(!rec || rec.weight==null || rec.weight==='' || !Array.isArray(rec.sets)) return;
+        var target=targetSetCount(rec, ex);
+        if(target>0 && completionCount(rec, ex)>=target){
+          var total=Number(rec.weight) + ((rec.barWeight!=null && rec.barWeight!=='')?Number(rec.barWeight):0);
+          if(rec.maxWeight==null || rec.maxWeight==='' || total>Number(rec.maxWeight)){
+            rec.maxWeight=total; changed=true;
+          }
+        }
+      });
     });
   });
   if(changed) saveData();
