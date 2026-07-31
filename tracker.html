@@ -71,9 +71,13 @@ var WT_ADHOC = /[?&]adhoc=/.test(location.search);
 var WT_ADHOC_FOCUS = (location.search.match(/[?&]adhoc=([a-z0-9_-]+)/)||[])[1] || '';
 var WT_UID = null, WT_NAME = '', CACHE_KEY = '', WT_ALL = {};
 function wtEsc(s){ return String(s).replace(/[&<>]/g,function(c){ return c==='&'?'&amp;':(c==='<'?'&lt;':'&gt;'); }); }
-const EQUIPMENT_OPTIONS = ['Free Weights','Cable','Machine','Barbell','Bodyweight'];
-// Collapse any legacy/plan equipment label into the curated toggle set above.
-function normEquip(label){
+// Weighted exercises pick a strength equipment; cardio exercises pick a machine.
+const STRENGTH_EQUIP_OPTIONS = ['Free Weights','Cable','Machine','Barbell','Bodyweight'];
+const CARDIO_EQUIP_OPTIONS   = ['Treadmill','Bike','Elliptical','Rower','Stair Climber','Other'];
+function isCardioEx(ex){ return !!(ex && (ex.cardio || ex.muscle==='cardio')); }
+function equipOptionsFor(ex){ return isCardioEx(ex) ? CARDIO_EQUIP_OPTIONS : STRENGTH_EQUIP_OPTIONS; }
+// Collapse any legacy/plan label into the curated strength toggle set.
+function normStrength(label){
   const n = (label==null?'':String(label)).trim().toLowerCase();
   if(!n) return 'Bodyweight';
   if(n.indexOf('cable')>-1) return 'Cable';
@@ -82,6 +86,32 @@ function normEquip(label){
   if(n.indexOf('free weight')>-1 || n.indexOf('dumbbell')>-1 || n.indexOf('kettlebell')>-1) return 'Free Weights';
   if(n.indexOf('floor')>-1 || n.indexOf('other')>-1 || n.indexOf('body')>-1) return 'Bodyweight';
   return 'Bodyweight';
+}
+// Collapse a cardio machine name/label into the curated cardio toggle set.
+function normCardio(label){
+  const n = (label==null?'':String(label)).trim().toLowerCase();
+  if(n.indexOf('tread')>-1 || n.indexOf('walk')>-1 || n.indexOf('run')>-1) return 'Treadmill';
+  if(n.indexOf('bike')>-1 || n.indexOf('cycl')>-1 || n.indexOf('spin')>-1) return 'Bike';
+  if(n.indexOf('elliptical')>-1) return 'Elliptical';
+  if(n.indexOf('row')>-1) return 'Rower';
+  if(n.indexOf('stair')>-1 || n.indexOf('step')>-1 || n.indexOf('climb')>-1) return 'Stair Climber';
+  return 'Other';
+}
+function normEq(label, cardio){ return cardio ? normCardio(label) : normStrength(label); }
+// Default equipment for an exercise before anything has been chosen.
+function defEquipFor(ex, displayName){
+  const nm = displayName || (ex && ex.name);
+  return isCardioEx(ex) ? normCardio(nm) : normStrength((ex && ex.equip) || guessEquipment(nm));
+}
+// Currently active equipment for a record (falls back to the default).
+function activeEquipFor(rec, ex, displayName){
+  const cardio = isCardioEx(ex);
+  const stored = rec && rec.equipment;
+  if(stored){
+    const ns = normEq(stored, cardio);
+    if(equipOptionsFor(ex).indexOf(ns) > -1) return ns;
+  }
+  return defEquipFor(ex, displayName);
 }
 // Per-equipment logged fields. The ACTIVE equipment's values live flat on the
 // exercise record; other equipments' values are stashed under record._alt[equip].
@@ -103,9 +133,9 @@ function applyBucket(c, b){
 }
 // Swap the active equipment on a record, stashing the current values and
 // restoring the target equipment's stashed values (or blanks for a fresh one).
-function switchEquipInPlace(container, oldEquip, newEquipRaw){
-  const newEquip = normEquip(newEquipRaw);
-  oldEquip = normEquip(oldEquip);
+function switchEquipInPlace(container, oldEquip, newEquipRaw, cardio){
+  const newEquip = normEq(newEquipRaw, cardio);
+  oldEquip = normEq(oldEquip, cardio);
   container.equipment = newEquip;
   if(newEquip===oldEquip) return;
   container._alt = container._alt || {};
@@ -116,11 +146,12 @@ function switchEquipInPlace(container, oldEquip, newEquipRaw){
 // Resolve the equipment bucket for a given date/equipment. The active bucket is
 // the flat record itself; inactive buckets live under _alt. defEquip is used for
 // legacy records that predate equipment selection (no stored equipment label).
-function bucketAt(sessionId, d, exId, equip, defEquip){
+function bucketAt(sessionId, d, exId, equip, defEquip, cardio){
   const map = data.progress[sessionId] || {};
   const c = map[d] && map[d][exId];
   if(!c) return null;
-  const act = normEquip(c.equipment || defEquip);
+  let act = c.equipment ? normEq(c.equipment, cardio) : defEquip;
+  if((cardio?CARDIO_EQUIP_OPTIONS:STRENGTH_EQUIP_OPTIONS).indexOf(act) < 0) act = defEquip;
   if(act===equip) return c;
   return (c._alt && c._alt[equip]) || null;
 }
@@ -314,21 +345,21 @@ function getExRecord(sessionId, dateStr, ex){
 // All cross-date lookups below are scoped to a single equipment so that, e.g.,
 // Cable weights never carry to Machine. Pass the currently active equip plus the
 // exercise's default equip (for legacy records with no stored equipment label).
-function prevWeightFor(sessionId, exId, equip, defEquip){
+function prevWeightFor(sessionId, exId, equip, defEquip, cardio){
   const map = data.progress[sessionId] || {};
   const dates = Object.keys(map).filter(d=> d < selectedDate).sort().reverse();
   for(const d of dates){
-    const b = bucketAt(sessionId, d, exId, equip, defEquip);
+    const b = bucketAt(sessionId, d, exId, equip, defEquip, cardio);
     if(b && b.weight!=null && b.weight!==''){ return {weight:b.weight, date:d}; }
   }
   return null;
 }
 // Best (highest) max weight ever logged for this exercise+equipment, before the selected date.
-function bestMaxWeightFor(sessionId, exId, equip, defEquip){
+function bestMaxWeightFor(sessionId, exId, equip, defEquip, cardio){
   const map = data.progress[sessionId] || {};
   let best=null;
   Object.keys(map).filter(d=> d < selectedDate).forEach(d=>{
-    const b = bucketAt(sessionId, d, exId, equip, defEquip);
+    const b = bucketAt(sessionId, d, exId, equip, defEquip, cardio);
     if(b && b.maxWeight!=null && b.maxWeight!=='' && (best===null || Number(b.maxWeight)>best.weight)){
       best = {weight:Number(b.maxWeight), date:d};
     }
@@ -336,11 +367,11 @@ function bestMaxWeightFor(sessionId, exId, equip, defEquip){
   return best;
 }
 // Previous value of a bucketed field (barWeight/incline/speed), scoped to equipment.
-function prevBucketFieldFor(sessionId, exId, field, equip, defEquip){
+function prevBucketFieldFor(sessionId, exId, field, equip, defEquip, cardio){
   const map = data.progress[sessionId] || {};
   const dates = Object.keys(map).filter(d=> d < selectedDate).sort().reverse();
   for(const d of dates){
-    const b = bucketAt(sessionId, d, exId, equip, defEquip);
+    const b = bucketAt(sessionId, d, exId, equip, defEquip, cardio);
     if(b && b[field]!=null && b[field]!==''){ return {value:b[field], date:d}; }
   }
   return null;
@@ -847,9 +878,9 @@ function renderCalories(){
 function weightBadge(sessionId, ex){
   const rec = getExRecord(sessionId, selectedDate, ex);
   const dispN = (data.swaps[sessionId+'-'+ex.id]) || ex.name;
-  const def = normEquip(ex.equip || guessEquipment(dispN));
-  const equip = normEquip(rec.equipment || def);
-  const prev = prevWeightFor(sessionId, ex.id, equip, def);
+  const def = defEquipFor(ex, dispN);
+  const equip = activeEquipFor(rec, ex, dispN);
+  const prev = prevWeightFor(sessionId, ex.id, equip, def, false);
   const u = data.weightUnit || 'lbs';
   if(rec.weight==null || rec.weight===''){
     return prev ? '<span style="font-size:11px;color:var(--text-faint);">last: '+prev.weight+' '+u+'</span>' : '<span style="font-size:11px;color:var(--text-faint);">first time logging</span>';
@@ -867,9 +898,9 @@ function weightBadge(sessionId, ex){
 function maxWeightBadge(sessionId, ex){
   const rec = getExRecord(sessionId, selectedDate, ex);
   const dispN = (data.swaps[sessionId+'-'+ex.id]) || ex.name;
-  const def = normEquip(ex.equip || guessEquipment(dispN));
-  const equip = normEquip(rec.equipment || def);
-  const best = bestMaxWeightFor(sessionId, ex.id, equip, def);
+  const def = defEquipFor(ex, dispN);
+  const equip = activeEquipFor(rec, ex, dispN);
+  const best = bestMaxWeightFor(sessionId, ex.id, equip, def, false);
   const u = data.weightUnit || 'lbs';
   if(rec.maxWeight==null || rec.maxWeight===''){
     return best ? '<span style="font-size:11px;color:var(--text-faint);">best: '+best.weight+' '+u+'</span>' : '<span style="font-size:11px;color:var(--text-faint);">no max yet</span>';
@@ -959,7 +990,7 @@ function leafCardHTML(sessionId, ex, bg){
   const wStep = wUnit==='kg'?'1':'2.5';
   const mwNum = (rec.maxWeight!=null && rec.maxWeight!=='') ? Number(rec.maxWeight) : null;
   const roundToStep = v => { const st = wUnit==='kg'?1:2.5; return Math.round(v/st)*st; };
-  const effEquip = normEquip(rec.equipment || ex.equip || guessEquipment(displayName));
+  const effEquip = activeEquipFor(rec, ex, displayName);
   const isBarbell = /barbell/i.test(effEquip) || /^bb[\s-]/i.test(displayName);
   const barW = (rec.barWeight!=null && rec.barWeight!=='') ? Number(rec.barWeight) : null;
   const wNum = (rec.weight!=null && rec.weight!=='') ? Number(rec.weight) : null;
@@ -1008,8 +1039,8 @@ function leafCardHTML(sessionId, ex, bg){
       '<div>'+
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">'+
           '<span data-reorder="'+sessionId+'" title="Reorder exercises" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">'+MUSCLE_LABELS[ex.muscle]+'<i class="ti ti-arrows-sort" style="font-size:11px;"></i></span>'+
-          '<select data-equipment="'+ex.id+'" data-curequip="'+effEquip+'" style="font-size:10px;color:var(--text);font-style:normal;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:6px;padding:2px 5px;">'+
-            EQUIPMENT_OPTIONS.map(opt=>'<option value="'+opt+'"'+(effEquip===opt?' selected':'')+'>'+opt+'</option>').join('')+
+          '<select data-equipment="'+ex.id+'" data-curequip="'+effEquip+'" data-cardio="'+(isCardioEx(ex)?'1':'')+'" style="font-size:10px;color:var(--text);font-style:normal;background:var(--surface-hi);border:0.5px solid var(--line);border-radius:6px;padding:2px 5px;">'+
+            equipOptionsFor(ex).map(opt=>'<option value="'+opt+'"'+(effEquip===opt?' selected':'')+'>'+opt+'</option>').join('')+
           '</select>'+
         '</div>'+
         '<div class="exname" style="font-size:19px;line-height:1;">'+displayName.toUpperCase()+'</div>'+
@@ -1128,23 +1159,24 @@ function renderExercises(){
       const rec = getExRecord(s.id, selectedDate, ex);
       // Resolve equipment first (carry forward the last-used equipment) so every
       // carry below is scoped to the correct equipment's history.
+      const cardio = isCardioEx(ex);
+      const dispN = (data.swaps[s.id+'-'+ex.id]) || ex.name;
+      const def = defEquipFor(ex, dispN);
       if(!rec.equipment){
         const prevEquip = prevExFieldFor(s.id, ex.id, 'equipment');
-        if(prevEquip){ rec.equipment = normEquip(prevEquip.value); carriedAny = true; }
+        if(prevEquip){ rec.equipment = normEq(prevEquip.value, cardio); carriedAny = true; }
       }
-      const dispN = (data.swaps[s.id+'-'+ex.id]) || ex.name;
-      const def = normEquip(ex.equip || guessEquipment(dispN));
-      const equip = normEquip(rec.equipment || def);
+      const equip = activeEquipFor(rec, ex, dispN);
       if(ex.w && (rec.weight==null || rec.weight==='')){
-        const prev = prevWeightFor(s.id, ex.id, equip, def);
+        const prev = prevWeightFor(s.id, ex.id, equip, def, cardio);
         if(prev){ rec.weight = prev.weight; carriedAny = true; }
       }
       if(ex.w && (rec.maxWeight==null || rec.maxWeight==='')){
-        const bestMax = bestMaxWeightFor(s.id, ex.id, equip, def);
+        const bestMax = bestMaxWeightFor(s.id, ex.id, equip, def, cardio);
         if(bestMax){ rec.maxWeight = bestMax.weight; carriedAny = true; }
       }
       if(ex.w && (rec.barWeight==null || rec.barWeight==='')){
-        const prevBar = prevBucketFieldFor(s.id, ex.id, 'barWeight', equip, def);
+        const prevBar = prevBucketFieldFor(s.id, ex.id, 'barWeight', equip, def, cardio);
         if(prevBar){ rec.barWeight = prevBar.value; carriedAny = true; }
       }
       // Once a weighted exercise is completed, capture its working+bar total as the max if it's a new high.
@@ -1159,11 +1191,11 @@ function renderExercises(){
       }
       if(ex.cardio){
         if(rec.incline==null || rec.incline===''){
-          const prevInc = prevBucketFieldFor(s.id, ex.id, 'incline', equip, def);
+          const prevInc = prevBucketFieldFor(s.id, ex.id, 'incline', equip, def, cardio);
           if(prevInc){ rec.incline = prevInc.value; carriedAny = true; }
         }
         if(rec.speed==null || rec.speed===''){
-          const prevSpd = prevBucketFieldFor(s.id, ex.id, 'speed', equip, def);
+          const prevSpd = prevBucketFieldFor(s.id, ex.id, 'speed', equip, def, cardio);
           if(prevSpd){ rec.speed = prevSpd.value; carriedAny = true; }
         }
       }
@@ -1331,7 +1363,7 @@ function renderExercises(){
       const container = getDateRecord(currentSession, selectedDate)[exId];
       // Switching equipment stashes the current equipment's logged values and
       // restores the target equipment's (so weights stay isolated per equipment).
-      if(container){ switchEquipInPlace(container, sel.dataset.curequip, sel.value); }
+      if(container){ switchEquipInPlace(container, sel.dataset.curequip, sel.value, sel.dataset.cardio==='1'); }
       await saveData();
       render();
     };
@@ -1823,9 +1855,9 @@ document.addEventListener('focusin', (e)=>{
     const ex = s ? sessionLeaves(s).find(x=>x.id===exId) : null;
     const container = getDateRecord(currentSession, selectedDate)[exId];
     const dispN = (data.swaps[currentSession+'-'+exId]) || (ex && ex.name);
-    const def = normEquip((ex && ex.equip) || guessEquipment(dispN));
-    const equip = normEquip((container && container.equipment) || def);
-    const prev = prevWeightFor(currentSession, exId, equip, def);
+    const def = defEquipFor(ex, dispN);
+    const equip = activeEquipFor(container, ex, dispN);
+    const prev = prevWeightFor(currentSession, exId, equip, def, false);
     if(prev && prev.weight!=null && prev.weight!==''){
       t.value = prev.weight;
       if(container){ container.weight = prev.weight; saveData(); }
