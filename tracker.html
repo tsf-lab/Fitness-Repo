@@ -19,9 +19,34 @@ h1,h2,.exname{font-family:'Bebas Neue',system-ui,sans-serif;letter-spacing:0.02e
 input[type=number]{-moz-appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 ::-webkit-scrollbar{display:none;}
+/* Inline Tabler icons (masks) -- replaces the CDN icon font */
+.ti{display:inline-block;width:1em;height:1em;vertical-align:-0.125em;background-color:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat;}
+.ti-arrows-sort{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M3%209l4%20-4l4%204m-4%20-4v14%22%20%2F%3E%3Cpath%20d%3D%22M21%2015l-4%204l-4%20-4m4%204v-14%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-check{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M5%2012l5%205l10%20-10%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-chevron-down{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%209l6%206l6%20-6%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-chevron-left{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M15%206l-6%206l6%206%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-chevron-right{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M9%206l6%206l-6%206%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-chevron-up{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%2015l6%20-6l6%206%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-clock{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M3%2012a9%209%200%201%200%2018%200a9%209%200%200%200%20-18%200%22%20%2F%3E%3Cpath%20d%3D%22M12%207v5l3%203%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-eraser{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M19%2020h-10.5l-4.21%20-4.3a1%201%200%200%201%200%20-1.41l10%20-10a1%201%200%200%201%201.41%200l5%205a1%201%200%200%201%200%201.41l-9.2%209.3%22%20%2F%3E%3Cpath%20d%3D%22M18%2013.3l-6.3%20-6.3%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-history{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M12%208l0%204l2%202%22%20%2F%3E%3Cpath%20d%3D%22M3.05%2011a9%209%200%201%201%20.5%204m-.5%205v-5h5%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-layout-grid{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M4%204m0%201a1%201%200%200%201%201%20-1h4a1%201%200%200%201%201%201v4a1%201%200%200%201%20-1%201h-4a1%201%200%200%201%20-1%20-1z%22%20%2F%3E%3Cpath%20d%3D%22M14%204m0%201a1%201%200%200%201%201%20-1h4a1%201%200%200%201%201%201v4a1%201%200%200%201%20-1%201h-4a1%201%200%200%201%20-1%20-1z%22%20%2F%3E%3Cpath%20d%3D%22M4%2014m0%201a1%201%200%200%201%201%20-1h4a1%201%200%200%201%201%201v4a1%201%200%200%201%20-1%201h-4a1%201%200%200%201%20-1%20-1z%22%20%2F%3E%3Cpath%20d%3D%22M14%2014m0%201a1%201%200%200%201%201%20-1h4a1%201%200%200%201%201%201v4a1%201%200%200%201%20-1%201h-4a1%201%200%200%201%20-1%20-1z%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-photo{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M15%208h.01%22%20%2F%3E%3Cpath%20d%3D%22M3%206a3%203%200%200%201%203%20-3h12a3%203%200%200%201%203%203v12a3%203%200%200%201%20-3%203h-12a3%203%200%200%201%20-3%20-3v-12z%22%20%2F%3E%3Cpath%20d%3D%22M3%2016l5%20-5c.928%20-.893%202.072%20-.893%203%200l5%205%22%20%2F%3E%3Cpath%20d%3D%22M14%2014l1%20-1c.928%20-.893%202.072%20-.893%203%200l3%203%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-player-play{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M7%204v16l13%20-8z%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-player-skip-forward{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M4%205v14l12%20-7z%22%20%2F%3E%3Cpath%20d%3D%22M20%205l0%2014%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-player-stop-filled{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M17%204h-10a3%203%200%200%200%20-3%203v10a3%203%200%200%200%203%203h10a3%203%200%200%200%203%20-3v-10a3%203%200%200%200%20-3%20-3z%22%20stroke-width%3D%220%22%20fill%3D%22%23fff%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-plus{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M12%205l0%2014%22%20%2F%3E%3Cpath%20d%3D%22M5%2012l14%200%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-repeat{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M4%2012v-3a3%203%200%200%201%203%20-3h13m-3%20-3l3%203l-3%203%22%20%2F%3E%3Cpath%20d%3D%22M20%2012v3a3%203%200%200%201%20-3%203h-13m3%203l-3%20-3l3%20-3%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-sparkles{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M16%2018a2%202%200%200%201%202%202a2%202%200%200%201%202%20-2a2%202%200%200%201%20-2%20-2a2%202%200%200%201%20-2%202zm0%20-12a2%202%200%200%201%202%202a2%202%200%200%201%202%20-2a2%202%200%200%201%20-2%20-2a2%202%200%200%201%20-2%202zm-7%2012a6%206%200%200%201%206%20-6a6%206%200%200%201%20-6%20-6a6%206%200%200%201%20-6%206a6%206%200%200%201%206%206z%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-trash{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M4%207l16%200%22%20%2F%3E%3Cpath%20d%3D%22M10%2011l0%206%22%20%2F%3E%3Cpath%20d%3D%22M14%2011l0%206%22%20%2F%3E%3Cpath%20d%3D%22M5%207l1%2012a2%202%200%200%200%202%202h8a2%202%200%200%200%202%20-2l1%20-12%22%20%2F%3E%3Cpath%20d%3D%22M9%207v-3a1%201%200%200%201%201%20-1h4a1%201%200%200%201%201%201v3%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-trophy{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M8%2021l8%200%22%20%2F%3E%3Cpath%20d%3D%22M12%2017l0%204%22%20%2F%3E%3Cpath%20d%3D%22M7%204l10%200%22%20%2F%3E%3Cpath%20d%3D%22M17%204v8a5%205%200%200%201%20-10%200v-8%22%20%2F%3E%3Cpath%20d%3D%22M5%209m-2%200a2%202%200%201%200%204%200a2%202%200%201%200%20-4%200%22%20%2F%3E%3Cpath%20d%3D%22M19%209m-2%200a2%202%200%201%200%204%200a2%202%200%201%200%20-4%200%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-arrow-up{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M12%205l0%2014%22%20%2F%3E%3Cpath%20d%3D%22M18%2011l-6%20-6%22%20%2F%3E%3Cpath%20d%3D%22M6%2011l6%20-6%22%20%2F%3E%3C%2Fsvg%3E")}
+.ti-arrow-down{--i:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%23fff%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20stroke%3D%22none%22%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M12%205l0%2014%22%20%2F%3E%3Cpath%20d%3D%22M18%2013l-6%206%22%20%2F%3E%3Cpath%20d%3D%22M6%2013l6%206%22%20%2F%3E%3C%2Fsvg%3E")}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 </head>
 <body>
 
@@ -194,17 +219,18 @@ function bucketAt(sessionId, d, exId, equip, defEquip, kind){
   return null;
 }
 
+// Fallback strength-equipment guess from an exercise name (returns canonical
+// labels). Only used when an exercise has no explicit equip; cardio and
+// loadable-bodyweight defaults are handled by defEquipFor, not here.
 function guessEquipment(name){
   const n = (name||'').toLowerCase();
   if(n.includes('cable')) return 'Cable';
+  if(n.includes('plate')) return 'Plate-loaded';
+  if(n.includes('kettlebell')) return 'Kettlebell';
   if(n.includes('machine')) return 'Machine';
-  if(n.includes('dumbbell') || n.includes('kettlebell') || n.includes('plate') || n.includes('ez bar')) return 'Dumbbells';
-  if(n.includes('bench')) return 'Bench';
-  if(n.includes('barbell') || n.includes('squat') || n.includes('deadlift') || n.includes('rack pull') || n.includes('military press') || n.includes('pendlay')) return 'Barbell/Rack';
-  if(['sit up','plank','leg raise','mountain climber','flutter kick','push up','glute bridge'].some(k=>n.includes(k))) return 'Floor';
-  if(['pull up','chin up','dip,','burpee','concentration curl'].some(k=>n.includes(k))) return 'Other';
-  if(n.includes('bike') || n.includes('treadmill') || n.includes('elliptical')) return 'Machine';
-  return 'Other';
+  if(n.includes('dumbbell') || n.includes('ez bar')) return 'Dumbbells';
+  if(n.includes('bench') || n.includes('barbell') || n.includes('squat') || n.includes('deadlift') || n.includes('rack pull') || n.includes('military press') || n.includes('pendlay')) return 'Barbell';
+  return 'Bodyweight';
 }
 
 const MUSCLE_LABELS = {
@@ -328,29 +354,36 @@ async function loadData(){
   ['p1','p2','p3','p4'].forEach(function(pk){ try{ var r=localStorage.getItem('wtcache::'+WT_UID+'::'+pk); if(r) WT_ALL[pk]=JSON.parse(r); }catch(e){} });
   wtApplyData(cached);
   WT_ALL[PHASE] = data;
+  applyDefaultSession();
+  render();                                  // instant first paint from cache
+  requestAnimationFrame(focusFirstUnstarted);
+  // Then sync from the cloud; merge cloud phases over the local caches.
+  var all = null, cloudOk = false;
+  try{ all = await wtLoadAll(WT_UID); cloudOk = true; }catch(e){}
+  if(all){ Object.keys(all).forEach(function(pk){ WT_ALL[pk] = all[pk]; }); wtApplyData(WT_ALL[PHASE]); WT_ALL[PHASE] = data; }
+  // Normalize once, on the authoritative data (post-cloud, or cache if offline).
   cleanupPhantomCalories();
   backfillMaxWeights();
   applyDefaultSession();
+  if(selectedDate!==todayStr && sessionCompletionForDate(currentSession, selectedDate)===0){ var _b=null,_c=0; SESSIONS.forEach(function(s){ var cc=sessionCompletionForDate(s.id,selectedDate); if(cc>_c){ _c=cc; _b=s.id; } }); if(_b) currentSession=_b; }
   render();
-  requestAnimationFrame(focusFirstUnstarted);
-  // Then sync from the cloud; merge cloud phases over the local caches.
-  try{
-    const all = await wtLoadAll(WT_UID);
-    if(all) Object.keys(all).forEach(function(pk){ WT_ALL[pk] = all[pk]; });
-    wtApplyData(WT_ALL[PHASE]);
-    WT_ALL[PHASE] = data;
-    cleanupPhantomCalories();
-    backfillMaxWeights();
-    applyDefaultSession();
-    if(selectedDate!==todayStr && sessionCompletionForDate(currentSession, selectedDate)===0){ var _b=null,_c=0; SESSIONS.forEach(function(s){ var cc=sessionCompletionForDate(s.id,selectedDate); if(cc>_c){ _c=cc; _b=s.id; } }); if(_b) currentSession=_b; }
-    render();
-    if(WT_UID && (!all || !all[PHASE])) wtSavePhase(WT_UID, PHASE, data);
-  }catch(e){}
+  if(cloudOk && WT_UID && (!all || !all[PHASE])) wtSavePhase(WT_UID, PHASE, data);
+}
+// Local cache write is debounced (coalesces rapid set-logging into one
+// JSON.stringify of the whole history) and flushed on page hide so nothing is
+// lost. Cloud save is already debounced inside wtSavePhase.
+var _lsSaveTimer = null;
+function flushLocalSave(){
+  if(_lsSaveTimer){ clearTimeout(_lsSaveTimer); _lsSaveTimer = null; }
+  try{ if(CACHE_KEY) localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
 }
 async function saveData(){
-  try{ if(CACHE_KEY) localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
+  if(_lsSaveTimer) clearTimeout(_lsSaveTimer);
+  _lsSaveTimer = setTimeout(flushLocalSave, 400);
   if(WT_UID) wtSavePhase(WT_UID, PHASE, data);
 }
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') flushLocalSave(); });
+window.addEventListener('pagehide', flushLocalSave);
 
 function blankSetEntry(ex){
   return ex.timed ? {duration:null} : {reps:null};
@@ -433,24 +466,6 @@ function prevExFieldFor(sessionId, exId, field){
     if(rec && rec[field]!=null && rec[field]!==''){ return {value:rec[field], date:d}; }
   }
   return null;
-}
-
-function exFieldBadge(sessionId, ex, field, unit){
-  const prev = prevExFieldFor(sessionId, ex.id, field);
-  const rec = getExRecord(sessionId, selectedDate, ex);
-  const cur = rec[field];
-  if(cur==null || cur===''){
-    return prev ? '<span style="font-size:10px;color:var(--text-faint);">last: '+prev.value+' '+unit+'</span>' : '<span style="font-size:10px;color:var(--text-faint);">&mdash;</span>';
-  }
-  if(!prev){
-    return '<span style="font-size:10px;color:var(--text-faint);">first time</span>';
-  }
-  const diff = cur - prev.value;
-  if(diff===0){
-    return '<span style="font-size:10px;color:var(--text-faint);">same as last</span>';
-  }
-  const up = diff>0;
-  return '<span style="font-size:10px;color:'+(up?'var(--up)':'var(--down)')+';display:inline-flex;align-items:center;gap:2px;"><i class="ti ti-arrow-'+(up?'up':'down')+'" style="font-size:11px;"></i>'+(up?'+':'')+diff+' '+unit+' vs last</span>';
 }
 
 function completionCount(rec, ex){
