@@ -76,7 +76,7 @@ function wtEsc(s){ return String(s).replace(/[&<>]/g,function(c){ return c==='&'
 //  - cardio:   cardio machines (incline/speed/duration)
 //  - loadbw:   loadable bodyweight (dips/pull-ups): a bar with signed added
 //              weight (+ added belt / - assisted band) OR a weight machine
-const STRENGTH_EQUIP_OPTIONS = ['Free Weights','Cable','Machine','Barbell','Bodyweight'];
+const STRENGTH_EQUIP_OPTIONS = ['Free Weights','Kettlebell','Cable','Machine','Plate-loaded','Barbell','Bodyweight'];
 const CARDIO_EQUIP_OPTIONS   = ['Treadmill','Bike','Elliptical','Rower','Stair Climber','Other'];
 const LOADBW_EQUIP_OPTIONS   = ['Pull-up Bar','Machine'];
 function isCardioEx(ex){ return !!(ex && (ex.cardio || ex.muscle==='cardio')); }
@@ -98,9 +98,11 @@ function normStrength(label){
   const n = (label==null?'':String(label)).trim().toLowerCase();
   if(!n) return 'Bodyweight';
   if(n.indexOf('cable')>-1) return 'Cable';
+  if(n.indexOf('plate')>-1) return 'Plate-loaded';
+  if(n.indexOf('kettle')>-1) return 'Kettlebell';
   if(n.indexOf('machine')>-1) return 'Machine';
   if(n.indexOf('barbell')>-1 || n.indexOf('bench')>-1 || n.indexOf('rack')>-1) return 'Barbell';
-  if(n.indexOf('free weight')>-1 || n.indexOf('dumbbell')>-1 || n.indexOf('kettlebell')>-1) return 'Free Weights';
+  if(n.indexOf('free weight')>-1 || n.indexOf('dumbbell')>-1) return 'Free Weights';
   if(n.indexOf('floor')>-1 || n.indexOf('other')>-1 || n.indexOf('body')>-1) return 'Bodyweight';
   return 'Bodyweight';
 }
