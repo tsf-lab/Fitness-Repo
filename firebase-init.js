@@ -2,7 +2,15 @@
    Loaded by index.html (hub/login), phase1.html, phase2.html.
    The config below is a PUBLIC client config (safe to commit); access is
    controlled by Firestore security rules (each user can touch only their
-   own users/{uid} document). */
+   own users/{uid} document).
+
+   NOTE ON GITHUB SECRET SCANNING: GitHub flags the apiKey below as a
+   "Google API Key". This is a KNOWN FALSE POSITIVE. A Firebase web apiKey
+   is a public project identifier, not a credential -- it ships in every
+   visitor's browser by design and cannot read/write data on its own. The
+   real security boundary is the Firestore rules + Firebase Auth, NOT this
+   key. Do not rotate it or scrub git history; dismiss the alert as
+   "won't fix / used in public client". */
 var firebaseConfig = {
   apiKey: "AIzaSyBPwk84M_evFnPHRsposaAzorfSy4ELHZk",
   authDomain: "tfs-fitness-db.firebaseapp.com",
