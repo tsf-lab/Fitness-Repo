@@ -76,7 +76,7 @@ function wtEsc(s){ return String(s).replace(/[&<>]/g,function(c){ return c==='&'
 //  - cardio:   cardio machines (incline/speed/duration)
 //  - loadbw:   loadable bodyweight (dips/pull-ups): a bar with signed added
 //              weight (+ added belt / - assisted band) OR a weight machine
-const STRENGTH_EQUIP_OPTIONS = ['Free Weights','Kettlebell','Cable','Machine','Plate-loaded','Barbell','Bodyweight'];
+const STRENGTH_EQUIP_OPTIONS = ['Dumbbells','Kettlebell','Cable','Machine','Plate-loaded','Barbell','Bodyweight'];
 const CARDIO_EQUIP_OPTIONS   = ['Treadmill','Bike','Elliptical','Rower','Stair Climber','Other'];
 const LOADBW_EQUIP_OPTIONS   = ['Pull-up Bar','Machine'];
 function isCardioEx(ex){ return !!(ex && (ex.cardio || ex.muscle==='cardio')); }
@@ -102,7 +102,7 @@ function normStrength(label){
   if(n.indexOf('kettle')>-1) return 'Kettlebell';
   if(n.indexOf('machine')>-1) return 'Machine';
   if(n.indexOf('barbell')>-1 || n.indexOf('bench')>-1 || n.indexOf('rack')>-1) return 'Barbell';
-  if(n.indexOf('free weight')>-1 || n.indexOf('dumbbell')>-1) return 'Free Weights';
+  if(n.indexOf('free weight')>-1 || n.indexOf('dumbbell')>-1) return 'Dumbbells';
   if(n.indexOf('floor')>-1 || n.indexOf('other')>-1 || n.indexOf('body')>-1) return 'Bodyweight';
   return 'Bodyweight';
 }
@@ -170,9 +170,12 @@ function switchEquipInPlace(container, oldEquip, newEquipRaw, kind){
   container.equipment = newEquip;
   if(newEquip===oldEquip) return;
   container._alt = container._alt || {};
+  // Find the target equipment's stashed bucket, normalizing legacy keys (e.g. a
+  // record stashed under 'Free Weights' still matches the renamed 'Dumbbells').
+  let restored = null;
+  for(const k in container._alt){ if(normFor(k, kind)===newEquip){ restored = container._alt[k]; delete container._alt[k]; break; } }
   container._alt[oldEquip] = extractBucket(container);
-  applyBucket(container, container._alt[newEquip] || null);
-  if(container._alt[newEquip]) delete container._alt[newEquip];
+  applyBucket(container, restored);
 }
 // Resolve the equipment bucket for a given date/equipment. The active bucket is
 // the flat record itself; inactive buckets live under _alt. defEquip is used for
@@ -184,14 +187,18 @@ function bucketAt(sessionId, d, exId, equip, defEquip, kind){
   let act = c.equipment ? normFor(c.equipment, kind) : defEquip;
   if(optionsForKind(kind).indexOf(act) < 0) act = defEquip;
   if(act===equip) return c;
-  return (c._alt && c._alt[equip]) || null;
+  if(c._alt){
+    if(c._alt[equip]) return c._alt[equip];
+    for(const k in c._alt){ if(normFor(k, kind)===equip) return c._alt[k]; }
+  }
+  return null;
 }
 
 function guessEquipment(name){
   const n = (name||'').toLowerCase();
   if(n.includes('cable')) return 'Cable';
   if(n.includes('machine')) return 'Machine';
-  if(n.includes('dumbbell') || n.includes('kettlebell') || n.includes('plate') || n.includes('ez bar')) return 'Free Weights';
+  if(n.includes('dumbbell') || n.includes('kettlebell') || n.includes('plate') || n.includes('ez bar')) return 'Dumbbells';
   if(n.includes('bench')) return 'Bench';
   if(n.includes('barbell') || n.includes('squat') || n.includes('deadlift') || n.includes('rack pull') || n.includes('military press') || n.includes('pendlay')) return 'Barbell/Rack';
   if(['sit up','plank','leg raise','mountain climber','flutter kick','push up','glute bridge'].some(k=>n.includes(k))) return 'Floor';
