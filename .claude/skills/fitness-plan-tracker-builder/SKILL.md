@@ -52,7 +52,7 @@ Use the bundled `scripts/segment_exercises.py` — it automates the row-detectio
 4. Spot-check 4-5 crops with the `view` tool across different pages (especially any page with a superset) before trusting the whole batch — tune the constants at the top of the script if a page's layout doesn't match (e.g. much higher-resolution PDF, different column layout).
 5. Paste the generated `exercise_images.js` content in as the tracker's `EXERCISE_IMAGES` constant.
 
-If a "Photo" button is wanted per exercise (recommended — this is in the template already), wire it to a lightbox that looks up `EXERCISE_IMAGES[sessionId + '-' + ex.id]`.
+If a "Photo" button is wanted per exercise (recommended — this is in the template already), wire it to a lightbox that looks up `EXERCISE_IMAGES[sessionId + '-' + ex.id]`. Exercises with no cropped image fall back to a Google Images search, same as the "Demo" YouTube link. Both searches run through `searchSubject()`, which prepends the exercise's selected equipment (cable / dumbbell / barbell / machine ...) unless the name already implies it — so if you change `EQUIPMENT_OPTIONS`, update the `EQUIP_SEARCH` table alongside it.
 
 ## Step 3 — Adapt the template
 

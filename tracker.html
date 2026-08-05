@@ -114,6 +114,32 @@ function isLoadableBW(ex, displayName){
 function equipKind(ex){ return isLoadableBW(ex) ? 'loadbw' : (isCardioEx(ex) ? 'cardio' : 'strength'); }
 function optionsForKind(kind){ return kind==='cardio'?CARDIO_EQUIP_OPTIONS : (kind==='loadbw'?LOADBW_EQUIP_OPTIONS : STRENGTH_EQUIP_OPTIONS); }
 function equipOptionsFor(ex){ return optionsForKind(equipKind(ex)); }
+// The Demo / Photo buttons search the web for the *selected* equipment plus the
+// exercise name, so "Chest Press" set to Cable finds cable demos, not machine ones.
+// [search term to prepend, regex matching names that already imply it]. An empty
+// term means the equipment adds nothing useful to a query (Pull-up Bar / Other).
+const EQUIP_SEARCH = {
+  'Dumbbells':     ['dumbbell',        /dumbbell|\bdbs?\b/],
+  'Kettlebell':    ['kettlebell',      /kettlebell|\bkbs?\b/],
+  'Cable':         ['cable',           /cable/],
+  'Machine':       ['machine',         /machine/],
+  'Plate-loaded':  ['plate loaded',    /plate.?load/],
+  'Barbell':       ['barbell',         /barbell|\bbb\b/],
+  'Bodyweight':    ['bodyweight',      /body ?weight/],
+  'Pull-up Bar':   ['',                null],
+  'Treadmill':     ['treadmill',       /treadmill|walk|run/],
+  'Bike':          ['stationary bike', /bike|cycl|spin/],
+  'Elliptical':    ['elliptical',      /elliptical/],
+  'Rower':         ['rowing machine',  /row/],
+  'Stair Climber': ['stair climber',   /stair|climb|step/],
+  'Other':         ['',                null]
+};
+function searchSubject(displayName, equip){
+  const e = EQUIP_SEARCH[equip];
+  if(!e || !e[0]) return displayName;
+  // Drop the prefix when the name already says it ("DB Bench Press" on Dumbbells).
+  return e[1].test((displayName||'').toLowerCase()) ? displayName : e[0]+' '+displayName;
+}
 // A loadable-bodyweight exercise shows weight fields even though ex.w is false.
 function exIsWeighted(ex){ return !!(ex && ex.w) || isLoadableBW(ex); }
 // On the bar, weight is signed (+ added / - assisted); the Machine behaves like a normal lift.
@@ -1120,8 +1146,8 @@ function leafCardHTML(sessionId, ex, bg){
           (isFullyComplete? '<button data-collapsecard="'+cardKey+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chevron-up" style="font-size:13px;"></i>Minimize</button>' : '')+
         '</div>'+
         '<div style="display:flex;gap:6px;">'+
-          '<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(displayName+' exercise form')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-player-play" style="font-size:13px;"></i>Demo</a>'+
-          (EXERCISE_IMAGES[sessionId+'-'+ex.id]!=null? '<button data-photo="'+sessionId+'-'+ex.id+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</button>' : '<a href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(displayName+' exercise')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</a>')+
+          '<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(searchSubject(displayName, effEquip)+' exercise form')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-player-play" style="font-size:13px;"></i>Demo</a>'+
+          (EXERCISE_IMAGES[sessionId+'-'+ex.id]!=null? '<button data-photo="'+sessionId+'-'+ex.id+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</button>' : '<a href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(searchSubject(displayName, effEquip)+' exercise')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</a>')+
         '</div>'+
       '</div>'+
     '</div>'+

@@ -53,6 +53,26 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <script>
 const EQUIPMENT_OPTIONS = ['Barbell/Bench','Barbell/Rack','Bench','Cable','Floor','Free Weights','Machine','Other'];
 
+// The Demo / Photo buttons search the web for the selected equipment plus the
+// exercise name, so "Chest Press" set to Cable finds cable demos, not machine ones.
+// [term to prepend, regex matching names that already imply it]; '' = adds nothing.
+const EQUIP_SEARCH = {
+  'Barbell/Bench': ['barbell',   /barbell|\bbb\b/],
+  'Barbell/Rack':  ['barbell',   /barbell|\bbb\b/],
+  'Bench':         ['barbell',   /barbell|\bbb\b/],
+  'Cable':         ['cable',     /cable/],
+  'Floor':         ['bodyweight',/body ?weight/],
+  'Free Weights':  ['dumbbell',  /dumbbell|\bdbs?\b|kettlebell|\bkbs?\b|ez bar|plate/],
+  'Machine':       ['machine',   /machine|treadmill|bike|elliptical|rower|stair/],
+  'Other':         ['',          null]
+};
+function searchSubject(displayName, equip){
+  const e = EQUIP_SEARCH[equip];
+  if(!e || !e[0]) return displayName;
+  // Drop the prefix when the name already says it ("DB Bench Press" on Free Weights).
+  return e[1].test((displayName||'').toLowerCase()) ? displayName : e[0]+' '+displayName;
+}
+
 function guessEquipment(name){
   const n = (name||'').toLowerCase();
   if(n.includes('cable')) return 'Cable';
@@ -785,6 +805,8 @@ function leafCardHTML(sessionId, ex, bg){
       weightBadge(sessionId, ex)+
     '</div>' : '';
 
+  // The equipment shown in the picker, also fed to the Demo / Photo web searches.
+  const equip = rec.equipment || ex.equip || guessEquipment(displayName);
 
   return '<div style="background:'+bg+';border-radius:12px;padding:12px;border-left:3px solid '+color+';">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'+
@@ -792,7 +814,7 @@ function leafCardHTML(sessionId, ex, bg){
         '<span style="display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;background:'+color+';color:#121316;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:5px;">'+MUSCLE_LABELS[ex.muscle]+'</span>'+
         '<div class="exname" style="font-size:19px;line-height:1;">'+displayName.toUpperCase()+'</div>'+
         (()=>{
-          const guessed = rec.equipment || ex.equip || guessEquipment(displayName);
+          const guessed = equip;
           const isGuess = !rec.equipment;
           return '<select data-equipment="'+ex.id+'" style="font-size:10px;color:'+(isGuess?'var(--text-faint)':'var(--text)')+';font-style:'+(isGuess?'italic':'normal')+';background:var(--surface-hi);border:0.5px solid var(--line);border-radius:6px;padding:2px 5px;margin-top:4px;">'+
             EQUIPMENT_OPTIONS.map(opt=>'<option value="'+opt+'"'+(guessed===opt?' selected':'')+'>'+opt+(isGuess && guessed===opt? ' (suggested)':'')+'</option>').join('')+
@@ -802,8 +824,8 @@ function leafCardHTML(sessionId, ex, bg){
         (ex.note? '<div style="font-size:11px;color:var(--text-faint);font-style:italic;margin-top:3px;">'+ex.note+'</div>' : '')+
       '</div>'+
       '<div style="display:flex;gap:6px;flex:0 0 auto;">'+
-        '<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(displayName+' exercise form')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-player-play" style="font-size:13px;"></i>Demo</a>'+
-        (EXERCISE_IMAGES[sessionId+'-'+ex.id]!=null? '<button data-photo="'+sessionId+'-'+ex.id+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</button>' : '')+
+        '<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(searchSubject(displayName, equip)+' exercise form')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-player-play" style="font-size:13px;"></i>Demo</a>'+
+        (EXERCISE_IMAGES[sessionId+'-'+ex.id]!=null? '<button data-photo="'+sessionId+'-'+ex.id+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</button>' : '<a href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(searchSubject(displayName, equip)+' exercise')+'" target="_blank" rel="noopener" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;text-decoration:none;"><i class="ti ti-photo" style="font-size:13px;"></i>Photo</a>')+
         '<button data-swap="'+sessionId+'-'+ex.id+'" data-muscle="'+ex.muscle+'" data-orig="'+ex.name+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-repeat" style="font-size:13px;"></i>Swap</button>'+
         '<button data-forcecomplete="'+ex.id+'" style="background:'+(isFullyComplete?'var(--up)':'transparent')+';border:0.5px solid '+(isFullyComplete?'var(--up)':'var(--line)')+';color:'+(isFullyComplete?'#121316':'var(--text-dim)')+';font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;font-weight:'+(isFullyComplete?'600':'400')+';"><i class="ti ti-check" style="font-size:13px;"></i>'+(isFullyComplete?'Completed':'Complete')+'</button>'+
         (isFullyComplete? '<button data-collapsecard="'+cardKey+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:5px 8px;border-radius:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chevron-up" style="font-size:13px;"></i>Minimize</button>' : '')+
