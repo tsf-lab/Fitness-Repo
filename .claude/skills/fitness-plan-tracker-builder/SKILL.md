@@ -21,7 +21,9 @@ A single `.html` file with everything inline (styles, fonts via CDN links, all J
 - Tracks weight (and, for cardio, incline/speed) with automatic carry-forward from the last time logged and an up/down comparison badge
 - Groups superset exercises into one bundled card with per-exercise subsections
 - Shows a cropped photo of each exercise pulled directly from the source PDF
-- Supports swapping any exercise for an alternative (from a small built-in database, or a fully custom one), removing exercises, and adding brand-new ones (from the database or blank)
+- Supports swapping any exercise for an alternative (from a small built-in database, or a fully custom one), removing exercises, and adding brand-new ones (from the database or blank) — all **scoped to the day they were made**, so the plan itself stays pristine and the next day starts from the original list again
+- Keeps weights isolated per equipment (a Cable weight never carries into Machine), tracks a top-set max alongside the working weight, handles barbell plate-vs-bar weight, and signs loadable-bodyweight work (+ added belt / − assisted band on dips and pull-ups)
+- Lets the user reorder a session's exercises, log calories, and add extra ad-hoc workouts to any day
 - Persists everything client-side (see "Storage" below)
 
 ## Step 0 — Check the context
@@ -52,18 +54,31 @@ Use the bundled `scripts/segment_exercises.py` — it automates the row-detectio
 4. Spot-check 4-5 crops with the `view` tool across different pages (especially any page with a superset) before trusting the whole batch — tune the constants at the top of the script if a page's layout doesn't match (e.g. much higher-resolution PDF, different column layout).
 5. Paste the generated `exercise_images.js` content in as the tracker's `EXERCISE_IMAGES` constant.
 
-If a "Photo" button is wanted per exercise (recommended — this is in the template already), wire it to a lightbox that looks up `EXERCISE_IMAGES[sessionId + '-' + ex.id]`. Exercises with no cropped image fall back to a Google Images search, same as the "Demo" YouTube link. Both searches run through `searchSubject()`, which prepends the exercise's selected equipment (cable / dumbbell / barbell / machine ...) unless the name already implies it — so if you change `EQUIPMENT_OPTIONS`, update the `EQUIP_SEARCH` table alongside it.
+If a "Photo" button is wanted per exercise (recommended — this is in the template already), wire it to a lightbox that looks up `EXERCISE_IMAGES[sessionId + '-' + ex.id]`. Exercises with no cropped image fall back to a Google Images search, same as the "Demo" YouTube link. Both searches run through `searchSubject()`, which prepends the exercise's selected equipment (cable / dumbbell / barbell / machine ...) unless the name already implies it — so if you change the equipment option lists, update the `EQUIP_SEARCH` table alongside them.
 
 ## Step 3 — Adapt the template
 
 Start from `assets/template.html` and:
 - Replace the `SESSIONS` array with the new plan's structure
-- Replace `EXERCISE_IMAGES` with the newly cropped set
+- Replace `EXERCISE_IMAGES` with the newly cropped set (an empty `{}` is valid — those exercises fall back to an image search)
 - Update `MUSCLE_ALTS` (the swap-suggestion database) to include the new plan's exercise names where relevant, keeping it alphabetized within each muscle group
-- Set sensible `equip:` defaults per exercise (see `guessEquipment()` — it heuristically guesses from the name, but explicit `equip:` on the exercise definition always takes precedence and is more reliable — ask the user for a quick equipment pass via CSV export/reimport if precision matters, see "Bulk-editing exercise names/equipment" below)
-- Update the header title/subtitle to match the new plan's name
+- Set sensible `equip:` defaults per exercise (see `guessEquipment()` — it heuristically guesses from the name, but explicit `equip:` on the exercise definition always takes precedence and is more reliable — ask the user for a quick equipment pass via CSV export/reimport if precision matters, see "Bulk-editing exercise names/equipment" below). Any label you write is collapsed into the curated toggle set by `normStrength()` / `normCardio()` / `normLoadBW()`, so a plan's own wording ("Free Weights", "Barbell/Rack") is safe to paste in
+- Set `PLAN_TITLE` / `PLAN_LABEL` near the top of the script to the new plan's name, and `CACHE_KEY` to something unique per plan (two trackers sharing a key share their logged data)
 
-Keep every existing feature working — don't strip things out. The full feature list (weight/reps/duration tracking with carry-forward, superset bundling, swap/remove/add exercise, equipment picker, calories, notes, per-day view via the week strip, extra ad-hoc workouts, collapse-on-complete, etc.) should all still function; they're all general-purpose and not tied to the specific plan's content.
+Keep every existing feature working — don't strip things out. The full feature list (weight/reps/duration tracking with carry-forward, per-equipment weight isolation, max-weight tracking, superset bundling, day-scoped swap/remove/add, exercise reordering, equipment picker, calories, notes, per-day view via the week strip, extra ad-hoc workouts, collapse-on-complete, etc.) should all still function; they're all general-purpose and not tied to the specific plan's content.
+
+### Where the plan-specific bits live
+
+Everything you need to touch is in the first ~370 lines; the rest is generic app code.
+
+| What | Where |
+| --- | --- |
+| Plan name, storage key | `PLAN_TITLE` / `PLAN_LABEL` / `CACHE_KEY` |
+| Muscle groups + colors | `MUSCLE_LABELS`, and the `--legs` / `--chest` / … CSS vars |
+| Swap database | `MUSCLE_ALTS` |
+| Exercise photos | `EXERCISE_IMAGES` |
+| The plan itself | `SESSIONS` (via `single()` / `superset()`) |
+| Week-strip tab abbreviations | `SHORT_LABELS` (keys must match session titles) |
 
 ## Bulk-editing exercise names/equipment
 
