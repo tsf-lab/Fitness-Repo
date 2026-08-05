@@ -294,23 +294,52 @@ function allSessionsForDate(dateStr){
   return [...SESSIONS, ...extras];
 }
 
-function sessionLeaves(s){
+function sessionLeaves(s, dateStr){
   let leaves=[];
   s.items.forEach(it=>{
     if(it.type==='single') leaves.push(it.ex);
     else leaves.push(...it.subs);
   });
-  leaves.push(...getCustomList(s.id));
+  leaves.push(...getCustomList(s.id, dateStr));
   return leaves;
 }
 
-function getCustomList(sessionId){
-  if(!data.customExercises) data.customExercises = {};
-  if(!data.customExercises[sessionId]) data.customExercises[sessionId] = [];
-  return data.customExercises[sessionId];
+/* ---- day-scoped plan edits ----------------------------------------------
+   Swapping, skipping or adding an exercise changes only the day it was done
+   on. The plan definition stays pristine, so opening the same workout on a
+   later day starts from the original exercise list again.
+   Readers never create storage (the week strip queries dozens of dates);
+   the edit* helpers do.                                                   */
+function swapsFor(dateStr){ return (data.swapsByDate && data.swapsByDate[dateStr||selectedDate]) || {}; }
+function removedFor(dateStr){ return (data.removedByDate && data.removedByDate[dateStr||selectedDate]) || {}; }
+function getCustomList(sessionId, dateStr){
+  const byDate = data.customByDate && data.customByDate[dateStr||selectedDate];
+  return (byDate && byDate[sessionId]) || [];
 }
+function editSwaps(dateStr){
+  const d = dateStr||selectedDate;
+  if(!data.swapsByDate) data.swapsByDate = {};
+  if(!data.swapsByDate[d]) data.swapsByDate[d] = {};
+  return data.swapsByDate[d];
+}
+function editRemoved(dateStr){
+  const d = dateStr||selectedDate;
+  if(!data.removedByDate) data.removedByDate = {};
+  if(!data.removedByDate[d]) data.removedByDate[d] = {};
+  return data.removedByDate[d];
+}
+function editCustomList(sessionId, dateStr){
+  const d = dateStr||selectedDate;
+  if(!data.customByDate) data.customByDate = {};
+  if(!data.customByDate[d]) data.customByDate[d] = {};
+  if(!data.customByDate[d][sessionId]) data.customByDate[d][sessionId] = [];
+  return data.customByDate[d][sessionId];
+}
+// The name to show for an exercise on a given day (its swap, else the plan's).
+function swapName(sessionId, ex, dateStr){ return swapsFor(dateStr)[sessionId+'-'+ex.id] || ex.name; }
+function isRemoved(sessionId, exId, dateStr){ return !!removedFor(dateStr)[sessionId+'-'+exId]; }
 
-let data = {progress:{}, swaps:{}, removed:{}, customExercises:{}, calorieUnit:'kcal', weightUnit:'lbs', extraWorkouts:{}, exerciseOrder:{}};
+let data = {progress:{}, swapsByDate:{}, removedByDate:{}, customByDate:{}, calorieUnit:'kcal', weightUnit:'lbs', extraWorkouts:{}, exerciseOrder:{}};
 let currentSession = SESSIONS[0].id;
 let userTouchedSession = false;
 let WT_SESSION_FIXED = false;
@@ -346,13 +375,53 @@ function last7Days(){
 function wtApplyData(obj){
   data = obj || {};
   if(!data.progress) data.progress = {};
-  if(!data.swaps) data.swaps = {};
-  if(!data.removed) data.removed = {};
-  if(!data.customExercises) data.customExercises = {};
+  if(!data.swapsByDate) data.swapsByDate = {};
+  if(!data.removedByDate) data.removedByDate = {};
+  if(!data.customByDate) data.customByDate = {};
   if(!data.calorieUnit) data.calorieUnit = 'kcal';
   if(!data.weightUnit) data.weightUnit = 'lbs';
   if(!data.extraWorkouts) data.extraWorkouts = {};
   if(!data.exerciseOrder) data.exerciseOrder = {};
+  migrateDayScopedEdits();
+}
+// Swaps / skips / added exercises used to be stored plan-wide, which meant an
+// edit made on one day silently rewrote every other day. Move any such saved
+// edit onto the days it was actually in effect -- every day that session was
+// logged, plus today so nothing disappears mid-plan -- and let future days fall
+// back to the original plan.
+function migrateDayScopedEdits(){
+  const oldSwaps = data.swaps, oldRemoved = data.removed, oldCustom = data.customExercises;
+  if(!oldSwaps && !oldRemoved && !oldCustom) return;
+  const datesFor = sid=>{
+    const set = {};
+    Object.keys((data.progress && data.progress[sid]) || {}).forEach(d=> set[d]=1);
+    set[todayStr] = 1;
+    return Object.keys(set);
+  };
+  const sidOf = key=> key.slice(0, key.indexOf('-'));
+  Object.keys(oldSwaps||{}).forEach(key=>{
+    datesFor(sidOf(key)).forEach(d=>{ const m = editSwaps(d); if(m[key]===undefined) m[key] = oldSwaps[key]; });
+  });
+  Object.keys(oldRemoved||{}).forEach(key=>{
+    datesFor(sidOf(key)).forEach(d=>{ const m = editRemoved(d); if(m[key]===undefined) m[key] = oldRemoved[key]; });
+  });
+  Object.keys(oldCustom||{}).forEach(sid=>{
+    (oldCustom[sid]||[]).forEach(ex=>{
+      datesFor(sid).forEach(d=>{
+        // Only onto days that actually logged it (plus today), so an exercise
+        // added months ago doesn't appear across the whole history.
+        const dayProg = data.progress[sid] && data.progress[sid][d];
+        if(d!==todayStr && !(dayProg && dayProg[ex.id])) return;
+        const list = editCustomList(sid, d);
+        if(!list.some(x=> x.id===ex.id)) list.push(ex);
+      });
+    });
+  });
+  // Keep the pre-migration copy under a key nothing reads, so this is
+  // reversible by hand if anything looks wrong. Removing the originals is what
+  // stops the migration re-running (and re-adding an edit you just undid).
+  data._legacyPlanEdits = {swaps: oldSwaps||null, removed: oldRemoved||null, customExercises: oldCustom||null};
+  delete data.swaps; delete data.removed; delete data.customExercises;
 }
 // Pick the workout to open on: the next one in plan order given this week's progress.
 function suggestedSessionForToday(){
@@ -516,8 +585,8 @@ function sessionCompletionForDate(sessionId, dateStr){
   const session = getSessionObj(sessionId);
   const prog = (data.progress[sessionId] && data.progress[sessionId][dateStr]) || {};
   let totalSets=0, doneSets=0;
-  sessionLeaves(session).forEach(ex=>{
-    if(data.removed[sessionId+'-'+ex.id]) return;
+  sessionLeaves(session, dateStr).forEach(ex=>{
+    if(isRemoved(sessionId, ex.id, dateStr)) return;
     const rec = prog[ex.id];
     totalSets += targetSetCount(rec, ex);
     if(rec) doneSets += completionCount(rec, ex);
@@ -622,10 +691,10 @@ function backfillMaxWeights(){
   var changed=false, prog=data.progress||{};
   Object.keys(prog).forEach(function(sid){
     var so=getSessionObj(sid); if(!so) return;
-    var leaves=sessionLeaves(so);
     var byDate=prog[sid]||{};
     Object.keys(byDate).forEach(function(d){
       var dayRec=byDate[d];
+      var leaves=sessionLeaves(so, d);   // that day's list: customs are day-scoped
       leaves.forEach(function(ex){
         if(!exIsWeighted(ex)) return;
         var rec=dayRec[ex.id];
@@ -847,7 +916,7 @@ function renderDayTabs(){
       const list = getExtrasForDate(selectedDate);
       const idx = list.findIndex(w=>w.id===id);
       if(idx>=0) list.splice(idx,1);
-      delete data.customExercises[id];
+      Object.keys(data.customByDate||{}).forEach(d=>{ delete data.customByDate[d][id]; });
       if(currentSession===id) currentSession = SESSIONS[0].id;
       await saveData();
       render();
@@ -956,7 +1025,7 @@ function renderCalories(){
 
 function weightBadge(sessionId, ex){
   const rec = getExRecord(sessionId, selectedDate, ex);
-  const dispN = (data.swaps[sessionId+'-'+ex.id]) || ex.name;
+  const dispN = swapName(sessionId, ex);
   const def = defEquipFor(ex, dispN);
   const equip = activeEquipFor(rec, ex, dispN);
   const prev = prevWeightFor(sessionId, ex.id, equip, def, equipKind(ex));
@@ -976,7 +1045,7 @@ function weightBadge(sessionId, ex){
 }
 function maxWeightBadge(sessionId, ex){
   const rec = getExRecord(sessionId, selectedDate, ex);
-  const dispN = (data.swaps[sessionId+'-'+ex.id]) || ex.name;
+  const dispN = swapName(sessionId, ex);
   const def = defEquipFor(ex, dispN);
   const equip = activeEquipFor(rec, ex, dispN);
   const best = bestMaxWeightFor(sessionId, ex.id, equip, def, equipKind(ex));
@@ -1000,7 +1069,7 @@ function maxWeightBadge(sessionId, ex){
 const expandedOverrides = new Set();
 
 function leafCardHTML(sessionId, ex, bg){
-  const displayName = (data.swaps[sessionId+'-'+ex.id]) || ex.name;
+  const displayName = swapName(sessionId, ex);
   const color = 'var(--'+ex.muscle+')';
   const rec = getExRecord(sessionId, selectedDate, ex);
   if(!rec.removedSetIdx) rec.removedSetIdx = [];
@@ -1174,18 +1243,18 @@ function orderBlocks(sid, blocks){
 // The reorderable blocks of a session (singles, supersets, standalone customs) with display labels, in current order.
 function sessionBlockList(sid){
   const s = getSessionObj(sid); if(!s) return [];
-  const customList = getCustomList(sid).filter(ex=> !data.removed[sid+'-'+ex.id]);
+  const customList = getCustomList(sid).filter(ex=> !isRemoved(sid, ex.id));
   const pairedMap = {}; const standaloneCustoms=[];
   customList.forEach(ex=>{ if(ex.pairedWith){ (pairedMap[ex.pairedWith]=pairedMap[ex.pairedWith]||[]).push(ex);} else standaloneCustoms.push(ex); });
-  const nameOf = ex => (data.swaps[sid+'-'+ex.id]||ex.name);
+  const nameOf = ex => swapName(sid, ex);
   const blocks=[];
   s.items.forEach((item, ii)=>{
     if(item.type==='single'){
-      if(data.removed[sid+'-'+item.ex.id]) return;
+      if(isRemoved(sid, item.ex.id)) return;
       const pairs = pairedMap[item.ex.id]||[];
       blocks.push({key:'i:'+item.ex.id, label: pairs.length? (nameOf(item.ex)+' + '+pairs.map(nameOf).join(' + ')) : nameOf(item.ex)});
     } else {
-      const visibleSubs = item.subs.filter(sub=> !data.removed[sid+'-'+sub.id]);
+      const visibleSubs = item.subs.filter(sub=> !isRemoved(sid, sub.id));
       if(!visibleSubs.length) return;
       const allSubs=[]; visibleSubs.forEach(sub=>{ allSubs.push(sub); (pairedMap[sub.id]||[]).forEach(p=>allSubs.push(p)); });
       blocks.push({key:'g:'+(item.id||('idx'+ii)), label:'Superset: '+allSubs.map(nameOf).join(' + ')});
@@ -1251,7 +1320,7 @@ function renderExercises(){
       // carry below is scoped to the correct equipment's history.
       const kind = equipKind(ex);
       const weighted = exIsWeighted(ex);
-      const dispN = (data.swaps[s.id+'-'+ex.id]) || ex.name;
+      const dispN = swapName(s.id, ex);
       const def = defEquipFor(ex, dispN);
       if(!rec.equipment){
         const prevEquip = prevExFieldFor(s.id, ex.id, 'equipment');
@@ -1294,7 +1363,7 @@ function renderExercises(){
     if(carriedAny) saveData();
   }
 
-  const customList = getCustomList(s.id).filter(ex=> !data.removed[s.id+'-'+ex.id]);
+  const customList = getCustomList(s.id).filter(ex=> !isRemoved(s.id, ex.id));
   const pairedMap = {};
   const standaloneCustoms = [];
   customList.forEach(ex=>{
@@ -1319,12 +1388,12 @@ function renderExercises(){
   const blocks=[];
   s.items.forEach((item, ii)=>{
     if(item.type==='single'){
-      if(data.removed[s.id+'-'+item.ex.id]) return;
+      if(isRemoved(s.id, item.ex.id)) return;
       const pairs = pairedMap[item.ex.id]||[];
       const h = pairs.length===0 ? leafCardHTML(s.id, item.ex, 'var(--surface)') : supersetWrapperHTML([item.ex, ...pairs], item.ex.sets);
       blocks.push({key:'i:'+item.ex.id, html:h});
     } else {
-      const visibleSubs = item.subs.filter(sub=> !data.removed[s.id+'-'+sub.id]);
+      const visibleSubs = item.subs.filter(sub=> !isRemoved(s.id, sub.id));
       if(visibleSubs.length===0) return;
       const allSubs = [];
       visibleSubs.forEach(sub=>{ allSubs.push(sub); (pairedMap[sub.id]||[]).forEach(p=> allSubs.push(p)); });
@@ -1353,14 +1422,14 @@ function renderExercises(){
 
   html += '<button id="addExerciseBtn" style="background:transparent;border:1.5px dashed var(--line);color:var(--text-dim);font-size:13px;padding:12px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-plus" style="font-size:15px;"></i>Add exercise</button>';
 
-  const removedInSession = sessionLeaves(s).filter(ex=> data.removed[s.id+'-'+ex.id]);
+  const removedInSession = sessionLeaves(s).filter(ex=> isRemoved(s.id, ex.id));
   if(removedInSession.length){
     html += '<div style="background:var(--surface);border-radius:12px;padding:10px;border:0.5px dashed var(--line);">'+
       '<div style="font-size:11px;color:var(--text-faint);margin-bottom:6px;">Removed from this session</div>'+
       '<div style="display:flex;flex-direction:column;gap:6px;">'+
       removedInSession.map(ex=>
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'+
-          '<span style="font-size:12px;color:var(--text-dim);">'+((data.swaps[s.id+'-'+ex.id])||ex.name)+'</span>'+
+          '<span style="font-size:12px;color:var(--text-dim);">'+swapName(s.id, ex)+'</span>'+
           '<button data-unremove="'+s.id+'-'+ex.id+'" style="background:transparent;border:0.5px solid var(--line);color:var(--text-dim);font-size:11px;padding:4px 8px;border-radius:8px;">Restore</button>'+
         '</div>'
       ).join('')+
@@ -1371,7 +1440,7 @@ function renderExercises(){
 
   document.querySelectorAll('[data-unremove]').forEach(b=>{
     b.onclick = async ()=>{
-      delete data.removed[b.dataset.unremove];
+      delete editRemoved()[b.dataset.unremove];
       await saveData(); render();
     };
   });
@@ -1581,7 +1650,7 @@ function renderExercises(){
     el.onclick = (e)=>{ e.stopPropagation(); openReorder(el.dataset.reorder); };
   });
   document.querySelectorAll('[data-skipex]').forEach(b=>{
-    b.onclick = async ()=>{ data.removed[b.dataset.skipex] = true; await saveData(); render(); };
+    b.onclick = async ()=>{ editRemoved()[b.dataset.skipex] = true; await saveData(); render(); };
   });
   document.querySelectorAll('[data-photo]').forEach(btn=>{
     btn.onclick = ()=> openPhoto(btn.dataset.photo);
@@ -1668,7 +1737,7 @@ function openAddExerciseForm(sessionId, pairedWith, removeKey){
   let parentName = null;
   if(pairedWith){
     const parentEx = sessionLeaves(getSessionObj(sessionId)).find(e=>e.id===pairedWith);
-    parentName = parentEx ? ((data.swaps[sessionId+'-'+parentEx.id])||parentEx.name) : null;
+    parentName = parentEx ? swapName(sessionId, parentEx) : null;
   }
 
   let dbOptions = '<option value="">&mdash; Custom exercise (type your own) &mdash;</option>';
@@ -1767,8 +1836,8 @@ function openAddExerciseForm(sessionId, pairedWith, removeKey){
     }
     if(notes) ex.note = notes;
     if(pairedWith) ex.pairedWith = pairedWith;
-    getCustomList(sessionId).push(ex);
-    if(removeKey) data.removed[removeKey] = true;
+    editCustomList(sessionId).push(ex);
+    if(removeKey) editRemoved()[removeKey] = true;
     await saveData();
     overlay.remove();
     render();
@@ -1780,8 +1849,8 @@ function getAllActiveExerciseNames(){
   const names = new Set();
   SESSIONS.forEach(s=>{
     sessionLeaves(s).forEach(ex=>{
-      if(data.removed[s.id+'-'+ex.id]) return;
-      names.add((data.swaps[s.id+'-'+ex.id]) || ex.name);
+      if(isRemoved(s.id, ex.id)) return;
+      names.add(swapName(s.id, ex));
     });
   });
   return names;
@@ -1819,21 +1888,21 @@ function openSwapMenu(key, muscle, orig){
   card.insertAdjacentHTML('afterend', html);
   document.querySelectorAll('[data-choose]').forEach(b=>{
     b.onclick = async ()=>{
-      data.swaps[b.dataset.choose] = b.dataset.name;
+      editSwaps()[b.dataset.choose] = b.dataset.name;
       openSwapKey=null;
       await saveData(); render();
     };
   });
   document.querySelectorAll('[data-restore]').forEach(b=>{
     b.onclick = async ()=>{
-      delete data.swaps[b.dataset.restore];
+      delete editSwaps()[b.dataset.restore];
       openSwapKey=null;
       await saveData(); render();
     };
   });
   document.querySelectorAll('[data-remove-ex]').forEach(b=>{
     b.onclick = async ()=>{
-      data.removed[b.dataset.removeEx] = true;
+      editRemoved()[b.dataset.removeEx] = true;
       openSwapKey=null;
       await saveData(); render();
     };
@@ -1853,7 +1922,7 @@ function openSwapMenu(key, muscle, orig){
 
 function firstFocusExId(){
   const s=getSessionObj(currentSession); if(!s) return null;
-  const leaves=sessionLeaves(s).filter(ex=> !data.removed[s.id+'-'+ex.id]);
+  const leaves=sessionLeaves(s).filter(ex=> !isRemoved(s.id, ex.id));
   if(!leaves.length) return null;
   const info=leaves.map(ex=>{
     const rec=getExRecord(s.id, selectedDate, ex);
@@ -1871,7 +1940,7 @@ function firstFocusExId(){
 }
 function focusFirstUnstarted(){
   const s=getSessionObj(currentSession); if(!s) return;
-  const leaves=sessionLeaves(s).filter(ex=> !data.removed[s.id+'-'+ex.id]);
+  const leaves=sessionLeaves(s).filter(ex=> !isRemoved(s.id, ex.id));
   const exId=firstFocusExId();
   if(!exId || (leaves.length && exId===leaves[0].id)){ window.scrollTo({top:0, behavior:'smooth'}); return; }
   let sel;
@@ -1954,7 +2023,7 @@ document.addEventListener('focusin', (e)=>{
     const s = getSessionObj(currentSession);
     const ex = s ? sessionLeaves(s).find(x=>x.id===exId) : null;
     const container = getDateRecord(currentSession, selectedDate)[exId];
-    const dispN = (data.swaps[currentSession+'-'+exId]) || (ex && ex.name);
+    const dispN = ex ? swapName(currentSession, ex) : null;
     const def = defEquipFor(ex, dispN);
     const equip = activeEquipFor(container, ex, dispN);
     const prev = prevWeightFor(currentSession, exId, equip, def, equipKind(ex));

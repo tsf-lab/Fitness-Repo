@@ -220,7 +220,11 @@ function sessionCompletionAt(defs, pdata, sid, date){
   var prog = (pdata.progress[sid] && pdata.progress[sid][date]) || {};
   var total=0, done=0;
   sessionLeavesHub(session).forEach(function(ex){
-    if(pdata.removed && pdata.removed[sid+'-'+ex.id]) return;
+    // Skips are day-scoped in the tracker; the legacy plan-wide map is still
+    // honoured for data saved before that change.
+    var rmKey = sid+'-'+ex.id;
+    var rmDay = pdata.removedByDate && pdata.removedByDate[date];
+    if((rmDay && rmDay[rmKey]) || (pdata.removed && pdata.removed[rmKey])) return;
     var rec = prog[ex.id];
     var removedIdx = (rec && rec.removedSetIdx) || [];
     for(var i=0;i<ex.sets;i++){ if(removedIdx.indexOf(i)<0) total++; }
